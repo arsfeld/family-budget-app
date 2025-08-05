@@ -1,0 +1,105 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Families (core authentication unit)
+model Family {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  
+  users           User[]
+  monthlyOverviews MonthlyOverview[]
+  categories      Category[]
+}
+
+// Users (belong to families)
+model User {
+  id           String    @id @default(cuid())
+  familyId     String
+  email        String    @unique
+  passwordHash String?   // Optional for unverified users
+  name         String
+  isVerified   Boolean   @default(false)
+  invitedBy    String?   // ID of user who invited them
+  invitedAt    DateTime?
+  verifiedAt   DateTime?
+  createdAt    DateTime  @default(now())
+  
+  family       Family        @relation(fields: [familyId], references: [id])
+  userIncome   UserIncome[]
+  userExpenses UserExpense[]
+}
+
+// Monthly Overviews (multiple scenarios per family)
+model MonthlyOverview {
+  id        String   @id @default(cuid())
+  familyId  String
+  name      String   // e.g., "Current", "Planned", "Conservative"
+  isActive  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  
+  family       Family        @relation(fields: [familyId], references: [id])
+  userIncome   UserIncome[]
+  userExpenses UserExpense[]
+  
+  @@index([familyId, isActive])
+}
+
+// User Income (monthly salaries and additional income)
+model UserIncome {
+  id               String  @id @default(cuid())
+  overviewId       String
+  userId           String
+  salaryAmount     Decimal @db.Decimal(10, 2) @default(0)
+  salaryFrequency  String  @default("monthly") // weekly, biweekly, semimonthly, monthly, yearly
+  monthlySalary    Decimal @db.Decimal(10, 2) // calculated monthly amount
+  additionalIncome Decimal @db.Decimal(10, 2) @default(0)
+  notes            String?
+  
+  overview MonthlyOverview @relation(fields: [overviewId], references: [id], onDelete: Cascade)
+  user     User            @relation(fields: [userId], references: [id])
+  
+  @@unique([overviewId, userId])
+}
+
+// User Expenses (monthly fixed costs)
+model UserExpense {
+  id              String  @id @default(cuid())
+  overviewId      String
+  userId          String
+  categoryId      String
+  name            String  @default("") // Display name for the expense
+  amount          Decimal @db.Decimal(10, 2)
+  isShared        Boolean @default(false)
+  sharePercentage Int?    // Percentage this user pays if shared
+  notes           String?
+  
+  overview MonthlyOverview @relation(fields: [overviewId], references: [id], onDelete: Cascade)
+  user     User            @relation(fields: [userId], references: [id])
+  category Category        @relation(fields: [categoryId], references: [id])
+  
+  @@index([overviewId, userId])
+}
+
+// Expense Categories
+model Category {
+  id       String  @id @default(cuid())
+  familyId String
+  name     String
+  icon     String?
+  color    String?
+  
+  family       Family       @relation(fields: [familyId], references: [id])
+  userExpenses UserExpense[]
+  
+  @@index([familyId])
+}

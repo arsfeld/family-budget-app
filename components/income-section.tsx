@@ -1,0 +1,230 @@
+"use client"
+
+import { useState } from "react"
+import { formatCurrency, SALARY_FREQUENCIES, calculateMonthlyAmount, type SalaryFrequency } from "@/lib/utils"
+import { 
+  CardIncome,
+  HeadingSection,
+  CurrencyDisplay,
+  InputCurrency,
+  StatusIndicator,
+  EmptyState,
+  ButtonPrimary
+} from "@/components/ui/design-system"
+import { Edit2 } from "lucide-react"
+
+interface UserIncome {
+  id: string
+  userId: string
+  salaryAmount: number
+  salaryFrequency: string
+  monthlySalary: number
+  additionalIncome: number
+  notes: string | null
+  user: {
+    id: string
+    name: string
+    email: string
+    isVerified?: boolean
+  }
+}
+
+interface IncomeSectionProps {
+  userIncomes: UserIncome[]
+  onUpdate: (incomeId: string, data: { salaryAmount?: number; salaryFrequency?: string; monthlySalary?: number; additionalIncome?: number; notes?: string }) => Promise<void>
+}
+
+export function IncomeSection({ userIncomes, onUpdate }: IncomeSectionProps) {
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editingData, setEditingData] = useState<{
+    salaryAmount: string
+    salaryFrequency: string
+    additionalIncome: string
+    notes: string
+  }>({ salaryAmount: "", salaryFrequency: "monthly", additionalIncome: "", notes: "" })
+  const [saving, setSaving] = useState(false)
+
+  const startEditing = (income: UserIncome) => {
+    setEditingId(income.id)
+    setEditingData({
+      salaryAmount: income.salaryAmount.toString(),
+      salaryFrequency: income.salaryFrequency || "monthly",
+      additionalIncome: income.additionalIncome.toString(),
+      notes: income.notes || "",
+    })
+  }
+
+  const cancelEditing = () => {
+    setEditingId(null)
+    setEditingData({ salaryAmount: "", salaryFrequency: "monthly", additionalIncome: "", notes: "" })
+  }
+
+  const saveChanges = async (incomeId: string) => {
+    setSaving(true)
+    try {
+      const salaryAmount = parseFloat(editingData.salaryAmount) || 0
+      const monthlySalary = calculateMonthlyAmount(salaryAmount, editingData.salaryFrequency as SalaryFrequency)
+      
+      await onUpdate(incomeId, {
+        salaryAmount,
+        salaryFrequency: editingData.salaryFrequency,
+        monthlySalary,
+        additionalIncome: parseFloat(editingData.additionalIncome) || 0,
+        notes: editingData.notes || null,
+      })
+      cancelEditing()
+    } catch (error) {
+      console.error("Failed to update income:", error)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const totalIncome = userIncomes.reduce(
+    (sum, income) => sum + income.monthlySalary + income.additionalIncome,
+    0
+  )
+
+  return (
+    <div>
+      <div className="mb-6 flex items-center justify-between">
+        <HeadingSection>Monthly Income</HeadingSection>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600">Total:</span>
+            <CurrencyDisplay value={totalIncome} color="income" />
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        {userIncomes.map((income, index) => {
+          const total = income.monthlySalary + income.additionalIncome
+          const isEditing = editingId === income.id
+
+          if (isEditing) {
+            return (
+              <CardIncome key={income.id} className="border-2 border-brand-primary/30 bg-brand-primary/5">
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      {income.user.name}'s Salary
+                    </label>
+                    <div className="mt-1 flex gap-2">
+                      <input
+                        type="number"
+                        value={editingData.salaryAmount}
+                        onChange={(e) => setEditingData({ ...editingData, salaryAmount: e.target.value })}
+                        className="flex-1 px-4 py-3 bg-white rounded-lg border-2 border-transparent shadow-inner-subtle font-mono text-lg font-semibold transition-all duration-200 placeholder:text-gray-400 hover:border-gray-300 focus:outline-none focus:border-brand-primary focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)]"
+                        placeholder="0"
+                      />
+                      <select
+                        value={editingData.salaryFrequency}
+                        onChange={(e) => setEditingData({ ...editingData, salaryFrequency: e.target.value })}
+                        className="px-4 py-3 bg-white rounded-lg border-2 border-transparent shadow-inner-subtle transition-all duration-200 hover:border-gray-300 focus:outline-none focus:border-brand-primary focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)]"
+                      >
+                        {SALARY_FREQUENCIES.map((freq) => (
+                          <option key={freq.value} value={freq.value}>
+                            {freq.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <p className="mt-1 text-xs text-gray-500">
+                      Monthly: {formatCurrency(calculateMonthlyAmount(parseFloat(editingData.salaryAmount) || 0, editingData.salaryFrequency as SalaryFrequency))}
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Additional Income</label>
+                    <input
+                      type="number"
+                      value={editingData.additionalIncome}
+                      onChange={(e) => setEditingData({ ...editingData, additionalIncome: e.target.value })}
+                      className="mt-1 block w-full px-4 py-3 bg-white rounded-lg border-2 border-transparent shadow-inner-subtle font-mono text-lg font-semibold transition-all duration-200 placeholder:text-gray-400 hover:border-gray-300 focus:outline-none focus:border-brand-primary focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)]"
+                      placeholder="0"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Notes (optional)</label>
+                    <input
+                      type="text"
+                      value={editingData.notes}
+                      onChange={(e) => setEditingData({ ...editingData, notes: e.target.value })}
+                      className="mt-1 block w-full px-4 py-3 bg-white rounded-lg border-2 border-transparent shadow-inner-subtle transition-all duration-200 placeholder:text-gray-400 hover:border-gray-300 focus:outline-none focus:border-brand-primary focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)]"
+                      placeholder="e.g., includes bonus"
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-2">
+                    <button
+                      onClick={cancelEditing}
+                      disabled={saving}
+                      className="px-4 py-2 rounded-lg font-medium text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 hover:shadow-sm transition-all duration-200 disabled:opacity-50"
+                    >
+                      Cancel
+                    </button>
+                    <ButtonPrimary
+                      onClick={() => saveChanges(income.id)}
+                      disabled={saving}
+                    >
+                      {saving ? "Saving..." : "Save"}
+                    </ButtonPrimary>
+                  </div>
+                </div>
+              </CardIncome>
+            )
+          }
+
+          return (
+            <CardIncome
+              key={income.id}
+              className="group flex items-center justify-between"
+            >
+              <div className="flex-1">
+                <p className="font-medium text-gray-900">
+                  {income.user.name}
+                  {income.user.isVerified === false && (
+                    <StatusIndicator type="neutral" className="ml-2 text-xs">
+                      Pending
+                    </StatusIndicator>
+                  )}
+                </p>
+                <p className="text-sm text-gray-600">
+                  {formatCurrency(income.salaryAmount)} {SALARY_FREQUENCIES.find(f => f.value === income.salaryFrequency)?.label || 'Monthly'}
+                  {income.additionalIncome > 0 && (
+                    <span className="ml-2 text-green-600">
+                      + {formatCurrency(income.additionalIncome)}
+                    </span>
+                  )}
+                </p>
+                <p className="text-xs text-gray-500">
+                  Monthly total: {formatCurrency(income.monthlySalary)}
+                  {income.notes && ` • ${income.notes}`}
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <CurrencyDisplay value={total} color="income" />
+                <button
+                  onClick={() => startEditing(income)}
+                  className="opacity-0 transition-opacity group-hover:opacity-100"
+                  title="Edit income"
+                >
+                  <Edit2 className="h-4 w-4 text-gray-500 hover:text-gray-700 transition-colors" />
+                </button>
+              </div>
+            </CardIncome>
+          )
+        })}
+      </div>
+
+      {userIncomes.length === 0 && (
+        <EmptyState
+          title="No income sources yet"
+          description="Add family members to start tracking monthly income"
+        />
+      )}
+    </div>
+  )
+}
