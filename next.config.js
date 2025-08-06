@@ -4,6 +4,17 @@ const nextConfig = {
   images: {
     domains: [],
   },
+  // Enable stricter type checking and linting in development
+  typescript: {
+    // Type checking happens in dev mode too
+    ignoreBuildErrors: false,
+  },
+  eslint: {
+    // Run ESLint on these directories during development
+    dirs: ['app', 'components', 'lib', 'middleware.ts'],
+    // Fail the build on ESLint errors
+    ignoreDuringBuilds: false,
+  },
   async headers() {
     return [
       {
