@@ -2,8 +2,10 @@
 
 import { User } from '@prisma/client'
 import { useState } from 'react'
-import { inviteFamilyMember } from './actions'
+import { inviteFamilyMember, removeFamilyMember, resendInvite } from './actions'
 import { StatefulButton, CardSpotlight, AnimatedTooltip } from '@/components/ui/aceternity'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Trash2, Send, MoreVertical, UserX, Mail } from 'lucide-react'
 
 interface FamilyMembersProps {
   familyId: string
@@ -24,6 +26,57 @@ export function FamilyMembers({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
+  const [removingUserId, setRemovingUserId] = useState<string | null>(null)
+  const [resendingUserId, setResendingUserId] = useState<string | null>(null)
+
+  const handleRemoveMember = async (userId: string, userName: string) => {
+    if (!confirm(`Are you sure you want to remove ${userName} from your family? This will delete all their income and expense data.`)) {
+      return
+    }
+
+    setRemovingUserId(userId)
+    setError(null)
+    setSuccess(null)
+
+    try {
+      const result = await removeFamilyMember(userId)
+
+      if (result.error) {
+        setError(result.error)
+      } else {
+        setSuccess(`Successfully removed ${userName} from your family`)
+        setTimeout(() => setSuccess(null), 3000)
+      }
+    } catch {
+      setError('Failed to remove family member')
+    } finally {
+      setRemovingUserId(null)
+      setActiveDropdown(null)
+    }
+  }
+
+  const handleResendInvite = async (userId: string, userName: string) => {
+    setResendingUserId(userId)
+    setError(null)
+    setSuccess(null)
+
+    try {
+      const result = await resendInvite(userId)
+
+      if (result.error) {
+        setError(result.error)
+      } else {
+        setSuccess(`Invitation resent to ${userName}`)
+        setTimeout(() => setSuccess(null), 3000)
+      }
+    } catch {
+      setError('Failed to resend invitation')
+    } finally {
+      setResendingUserId(null)
+      setActiveDropdown(null)
+    }
+  }
 
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -68,50 +121,108 @@ export function FamilyMembers({
       <div className="mb-6 space-y-3">
         <h3 className="mb-3 text-sm font-medium text-gray-700">Current Members</h3>
         {members.map((member) => (
-          <CardSpotlight
-            key={member.id}
-            className="group transition-all hover:shadow-md"
-          >
-            <div className="flex items-center justify-between p-4">
-              <div className="flex items-center gap-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-blue-600 text-white">
-                  <span className="text-lg font-semibold">
-                    {member.name.charAt(0).toUpperCase()}
-                  </span>
+          <div key={member.id} className="relative">
+            <CardSpotlight
+              className="group transition-all hover:shadow-md overflow-visible"
+            >
+              <div className="flex items-center justify-between p-4">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-blue-600 text-white">
+                    <span className="text-lg font-semibold">
+                      {member.name.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900">{member.name}</p>
+                    <p className="text-sm text-gray-600">{member.email}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-medium text-gray-900">{member.name}</p>
-                  <p className="text-sm text-gray-600">{member.email}</p>
+                <div className="flex items-center gap-2">
+                  {member.id === currentUserId && (
+                    <span className="rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 px-3 py-1 text-xs font-semibold text-blue-800">
+                      You
+                    </span>
+                  )}
+                  {member.isVerified ? (
+                    <AnimatedTooltip content="Account verified and active">
+                      <span className="flex items-center gap-1 rounded-full bg-gradient-to-r from-green-100 to-emerald-100 px-3 py-1 text-xs font-semibold text-green-800">
+                        <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                        Active
+                      </span>
+                    </AnimatedTooltip>
+                  ) : (
+                    <AnimatedTooltip content="Invitation sent - awaiting verification">
+                      <span className="flex items-center gap-1 rounded-full bg-gradient-to-r from-yellow-100 to-amber-100 px-3 py-1 text-xs font-semibold text-yellow-800">
+                        <svg className="h-3 w-3 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                        </svg>
+                        Pending
+                      </span>
+                    </AnimatedTooltip>
+                  )}
+                  
+                  {member.id !== currentUserId && (
+                    <div className="relative z-10">
+                      <button
+                        onClick={() => setActiveDropdown(activeDropdown === member.id ? null : member.id)}
+                        className="relative z-10 p-1 rounded-lg hover:bg-gray-100 transition-colors"
+                        disabled={removingUserId === member.id || resendingUserId === member.id}
+                      >
+                        {removingUserId === member.id ? (
+                          <div className="animate-spin h-4 w-4 border-2 border-gray-300 border-t-gray-600 rounded-full" />
+                        ) : resendingUserId === member.id ? (
+                          <div className="animate-spin h-4 w-4 border-2 border-blue-300 border-t-blue-600 rounded-full" />
+                        ) : (
+                          <MoreVertical className="h-4 w-4 text-gray-500" />
+                        )}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                {member.id === currentUserId && (
-                  <span className="rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 px-3 py-1 text-xs font-semibold text-blue-800">
-                    You
-                  </span>
+            </CardSpotlight>
+            
+            {/* Dropdown positioned outside the card */}
+            {member.id !== currentUserId && (
+              <AnimatePresence>
+                {activeDropdown === member.id && (
+                  <>
+                    {/* Invisible overlay to close dropdown when clicking outside */}
+                    <div
+                      className="fixed inset-0 z-20"
+                      onClick={() => setActiveDropdown(null)}
+                    />
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-4 top-14 w-48 bg-white rounded-lg shadow-xl border border-gray-200 z-30 overflow-hidden"
+                    >
+                      {!member.isVerified && (
+                        <button
+                          onClick={() => handleResendInvite(member.id, member.name)}
+                          className="flex items-center gap-2 w-full px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors text-left"
+                        >
+                          <Mail className="h-4 w-4" />
+                          Resend Invite
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleRemoveMember(member.id, member.name)}
+                        className="flex items-center gap-2 w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors text-left border-t border-gray-100"
+                      >
+                        <UserX className="h-4 w-4" />
+                        Remove Member
+                      </button>
+                    </motion.div>
+                  </>
                 )}
-                {member.isVerified ? (
-                  <AnimatedTooltip content="Account verified and active">
-                    <span className="flex items-center gap-1 rounded-full bg-gradient-to-r from-green-100 to-emerald-100 px-3 py-1 text-xs font-semibold text-green-800">
-                      <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                      Active
-                    </span>
-                  </AnimatedTooltip>
-                ) : (
-                  <AnimatedTooltip content="Invitation sent - awaiting verification">
-                    <span className="flex items-center gap-1 rounded-full bg-gradient-to-r from-yellow-100 to-amber-100 px-3 py-1 text-xs font-semibold text-yellow-800">
-                      <svg className="h-3 w-3 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-                      </svg>
-                      Pending
-                    </span>
-                  </AnimatedTooltip>
-                )}
-              </div>
-            </div>
-          </CardSpotlight>
+              </AnimatePresence>
+            )}
+          </div>
         ))}
       </div>
 

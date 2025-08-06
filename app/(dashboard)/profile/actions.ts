@@ -146,6 +146,115 @@ export async function inviteFamilyMember({
   }
 }
 
+export async function removeFamilyMember(userId: string) {
+  const session = await auth()
+
+  if (!session?.user) {
+    return { error: 'Unauthorized' }
+  }
+
+  try {
+    // Verify the user is in the same family
+    const userToRemove = await db.user.findFirst({
+      where: {
+        id: userId,
+        familyId: session.user.familyId,
+      },
+    })
+
+    if (!userToRemove) {
+      return { error: 'User not found in your family' }
+    }
+
+    // Prevent removing yourself
+    if (userId === session.user.id) {
+      return { error: 'You cannot remove yourself from the family' }
+    }
+
+    // Check if this is the last verified user (prevent removing last admin)
+    const verifiedUsers = await db.user.count({
+      where: {
+        familyId: session.user.familyId,
+        isVerified: true,
+      },
+    })
+
+    if (userToRemove.isVerified && verifiedUsers <= 1) {
+      return { error: 'Cannot remove the last verified family member' }
+    }
+
+    // Delete all user's data (cascade will handle related records)
+    await db.$transaction(async (tx) => {
+      // Delete user's income records
+      await tx.userIncome.deleteMany({
+        where: { userId },
+      })
+
+      // Delete user's expense records
+      await tx.userExpense.deleteMany({
+        where: { userId },
+      })
+
+      // Delete the user
+      await tx.user.delete({
+        where: { id: userId },
+      })
+    })
+
+    revalidatePath('/profile')
+    revalidatePath('/dashboard')
+
+    return { success: true }
+  } catch (error) {
+    console.error('Remove family member error:', error)
+    return { error: 'Failed to remove family member' }
+  }
+}
+
+export async function resendInvite(userId: string) {
+  const session = await auth()
+
+  if (!session?.user) {
+    return { error: 'Unauthorized' }
+  }
+
+  try {
+    // Verify the user is in the same family and not verified
+    const userToInvite = await db.user.findFirst({
+      where: {
+        id: userId,
+        familyId: session.user.familyId,
+        isVerified: false,
+      },
+    })
+
+    if (!userToInvite) {
+      return { error: 'User not found or already verified' }
+    }
+
+    // Update the invitation timestamp
+    await db.user.update({
+      where: { id: userId },
+      data: {
+        invitedAt: new Date(),
+        invitedBy: session.user.id,
+      },
+    })
+
+    // In a real app, you would resend the invitation email here
+    console.log(
+      `Invitation resent to ${userToInvite.email} to join family ${session.user.familyId}`
+    )
+
+    revalidatePath('/profile')
+
+    return { success: true }
+  } catch (error) {
+    console.error('Resend invite error:', error)
+    return { error: 'Failed to resend invitation' }
+  }
+}
+
 export async function createCategory({
   name,
   icon,

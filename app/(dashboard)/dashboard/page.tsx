@@ -286,6 +286,7 @@ export default async function DashboardPage() {
                     additionalIncome: Number(income.additionalIncome),
                   }))}
                   onUpdate={updateUserIncome}
+                  familyId={session.user.familyId}
                 />
               </AnimateIn>
 
