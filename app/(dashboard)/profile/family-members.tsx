@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { inviteFamilyMember, removeFamilyMember, resendInvite } from './actions'
 import { StatefulButton, CardSpotlight, AnimatedTooltip } from '@/components/ui/aceternity'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Trash2, Send, MoreVertical, UserX, Mail } from 'lucide-react'
+import { MoreVertical, UserX, Mail } from 'lucide-react'
 
 interface FamilyMembersProps {
   familyId: string
@@ -317,7 +317,7 @@ export function FamilyMembers({
 
             <div className="rounded-lg bg-blue-50 p-3">
               <p className="text-sm text-blue-800">
-                <strong>Note:</strong> They'll receive an email invitation to join your family budget.
+                <strong>Note:</strong> They&apos;ll receive an email invitation to join your family budget.
                 Until they verify their account, you can still assign income and
                 expenses to them.
               </p>

@@ -17,6 +17,7 @@ interface StatefulButtonProps
   successText?: string
   successDuration?: number
   onSuccess?: () => void
+  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void | Promise<void>
 }
 
 export const StatefulButton = React.forwardRef<
@@ -52,7 +53,7 @@ export const StatefulButton = React.forwardRef<
 
       if (onClick) {
         const result = onClick(e)
-        if (result instanceof Promise) {
+        if (result && typeof (result as Promise<void>).then === 'function') {
           setInternalLoading(true)
           try {
             await result
@@ -61,7 +62,7 @@ export const StatefulButton = React.forwardRef<
               setInternalSuccess(false)
               onSuccess?.()
             }, successDuration)
-          } catch (error) {
+          } catch {
             // Handle error if needed
           } finally {
             setInternalLoading(false)

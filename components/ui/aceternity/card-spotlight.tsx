@@ -6,11 +6,9 @@ import { cn } from '@/lib/aceternity-utils'
 export const CardSpotlight = ({
   children,
   className,
-  radius = 350,
 }: {
   children: React.ReactNode
   className?: string
-  radius?: number
 }) => {
   return (
     <div
@@ -33,11 +31,9 @@ export const CardSpotlight = ({
 export const IncomeCardSpotlight = ({
   children,
   className,
-  radius = 350,
 }: {
   children: React.ReactNode
   className?: string
-  radius?: number
 }) => {
   return (
     <div
@@ -64,11 +60,9 @@ export const IncomeCardSpotlight = ({
 export const ExpenseCardSpotlight = ({
   children,
   className,
-  radius = 350,
 }: {
   children: React.ReactNode
   className?: string
-  radius?: number
 }) => {
   return (
     <div
@@ -95,12 +89,10 @@ export const ExpenseCardSpotlight = ({
 export const SummaryCardSpotlight = ({
   children,
   className,
-  radius = 350,
   isPositive = true,
 }: {
   children: React.ReactNode
   className?: string
-  radius?: number
   isPositive?: boolean
 }) => {
   const baseClasses = cn(

@@ -167,7 +167,7 @@ export function QuickAddMember({ familyId, onAdd }: QuickAddMemberProps) {
 
                   <div className="p-3 rounded-lg bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200">
                     <p className="text-xs text-purple-700">
-                      They'll be added to your family budget immediately. You can assign income and expenses right away.
+                      They&apos;ll be added to your family budget immediately. You can assign income and expenses right away.
                     </p>
                   </div>
 

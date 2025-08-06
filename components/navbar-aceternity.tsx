@@ -8,10 +8,8 @@ import { ScenarioDialog } from './scenario-dialog'
 import {
   Settings,
   LayoutDashboard,
-  User,
   LogOut,
   Plus,
-  Copy,
   Edit3,
 } from 'lucide-react'
 import {
@@ -52,7 +50,6 @@ export function NavbarAceternity({
   const router = useRouter()
   const pathname = usePathname()
   const [showScenarioDialog, setShowScenarioDialog] = useState(false)
-  const [switching, setSwitching] = useState<string | null>(null)
   const [showQuickCreate, setShowQuickCreate] = useState(false)
   const [quickCreateName, setQuickCreateName] = useState('')
   const [quickCreateCloneFrom, setQuickCreateCloneFrom] = useState<string>('')
@@ -66,8 +63,8 @@ export function NavbarAceternity({
   const [showUserMenu, setShowUserMenu] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const quickCreateRef = useRef<HTMLDivElement>(null)
-  const timeoutRef = useRef<NodeJS.Timeout>()
-  const quickCreateTimeoutRef = useRef<NodeJS.Timeout>()
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const quickCreateTimeoutRef = useRef<NodeJS.Timeout>(null)
 
   const handleMouseEnter = () => {
     if (timeoutRef.current) {
@@ -154,14 +151,11 @@ export function NavbarAceternity({
   }
 
   const handleSwitch = async (overviewId: string) => {
-    setSwitching(overviewId)
     try {
       await switchMonthlyOverview(overviewId)
       router.refresh()
     } catch (error) {
       console.error('Failed to switch overview:', error)
-    } finally {
-      setSwitching(null)
     }
   }
 

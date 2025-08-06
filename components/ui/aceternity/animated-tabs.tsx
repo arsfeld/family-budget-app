@@ -6,7 +6,7 @@ import { cn } from '@/lib/aceternity-utils'
 
 type Tab = {
   id: string
-  label: string
+  label: React.ReactNode
   icon?: React.ReactNode
   content?: React.ReactNode
 }
@@ -130,7 +130,7 @@ export const FancyAnimatedTabs = ({
     <div className={cn('w-full', containerClassName)}>
       <div className="relative">
         <div className="flex border-b border-gray-200 dark:border-gray-800">
-          {tabs.map((tab, idx) => (
+          {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => handleTabClick(tab.id)}

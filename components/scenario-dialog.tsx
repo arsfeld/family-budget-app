@@ -11,7 +11,6 @@ import {
   ChevronDown,
   ChevronRight,
   Trash2,
-  Settings,
 } from 'lucide-react'
 
 interface MonthlyOverview {

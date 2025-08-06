@@ -17,7 +17,7 @@ type TabId = 'profile' | 'family' | 'categories'
 
 interface Tab {
   id: TabId
-  label: string
+  label: React.ReactNode
   icon: string
   description: string
 }
@@ -54,7 +54,7 @@ export function SettingsTabs({ user, categories }: SettingsTabsProps) {
         <span>{tab.label}</span>
       </div>
     ),
-    content: null as any, // We'll render content separately
+    content: null,
   }))
 
   return (

@@ -12,7 +12,6 @@ import {
 import {
   ExpenseCardSpotlight,
   StatefulButton,
-  AnimatedTooltip,
 } from '@/components/ui/aceternity'
 import { Edit2, Trash2, Plus } from 'lucide-react'
 

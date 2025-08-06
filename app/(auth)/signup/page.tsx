@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { User, Mail, Lock, AlertCircle, CheckCircle } from 'lucide-react'
-import { StatefulButton, CardSpotlight, MultiStepLoader } from '@/components/ui/aceternity'
+import { StatefulButton, CardSpotlight } from '@/components/ui/aceternity'
 import { cn } from '@/lib/aceternity-utils'
 
 export default function SignupPage() {

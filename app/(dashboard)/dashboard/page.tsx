@@ -4,7 +4,6 @@ import { redirect } from 'next/navigation'
 import { IncomeSection } from '@/components/income-section'
 import { ExpenseSection } from '@/components/expense-section'
 import {
-  CardSummary,
   CurrencyDisplay,
   AnimateIn,
   EmptyState,
@@ -14,7 +13,6 @@ import {
   ExpenseCardSpotlight,
   SummaryCardSpotlight,
   PrimaryButton,
-  CardSkeletonLoader,
 } from '@/components/ui/aceternity'
 import {
   updateUserIncome,

@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import Image from 'next/image'
 import { motion, AnimatePresence, useSpring, useTransform, useMotionValue } from 'framer-motion'
 import { cn } from '@/lib/aceternity-utils'
 
@@ -119,9 +120,11 @@ export const AnimatedTooltipGroup = ({
           content={
             <div className="flex items-center gap-2">
               {item.image && (
-                <img
+                <Image
                   src={item.image}
                   alt={item.name}
+                  width={32}
+                  height={32}
                   className="w-8 h-8 rounded-full"
                 />
               )}
@@ -135,9 +138,11 @@ export const AnimatedTooltipGroup = ({
         >
           <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform">
             {item.image ? (
-              <img
+              <Image
                 src={item.image}
                 alt={item.name}
+                width={40}
+                height={40}
                 className="w-full h-full rounded-full object-cover"
               />
             ) : (

@@ -16,12 +16,11 @@ import {
 import {
   IncomeCardSpotlight,
   StatefulButton,
-  HelpTooltip,
   CardSpotlight,
 } from '@/components/ui/aceternity'
-import { Edit2, Plus, UserPlus, Mail, User } from 'lucide-react'
+import { Edit2, UserPlus, Mail, User } from 'lucide-react'
 import { inviteFamilyMember } from '@/app/(dashboard)/profile/actions'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { cn } from '@/lib/aceternity-utils'
 
 interface UserIncome {
