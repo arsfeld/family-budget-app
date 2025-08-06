@@ -1,6 +1,6 @@
 import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
-import { NavbarIntegrated } from './navbar-integrated'
+import { NavbarAceternity } from './navbar-aceternity'
 
 export async function NavbarWrapper() {
   const session = await auth()
@@ -14,6 +14,8 @@ export async function NavbarWrapper() {
     id: string
     name: string
     isActive: boolean
+    isArchived: boolean
+    archivedAt: Date | null
     createdAt: Date
   }> = []
   if (session.user.familyId) {
@@ -24,13 +26,15 @@ export async function NavbarWrapper() {
         id: true,
         name: true,
         isActive: true,
+        isArchived: true,
+        archivedAt: true,
         createdAt: true,
       },
     })
   }
 
   return (
-    <NavbarIntegrated
+    <NavbarAceternity
       user={session.user}
       overviews={overviews}
     />

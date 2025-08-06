@@ -12,7 +12,8 @@ This is a **Family Budget Application** - a streamlined family budget overview t
 
 - **Next.js 15** with App Router (React 19)
 - **TypeScript** with strict mode enabled
-- **Tailwind CSS** for styling with shadcn/ui components
+- **Tailwind CSS** for styling with **Aceternity UI** components
+- **Framer Motion** for advanced animations and interactions
 - **Server Actions** enabled for form handling
 
 ### Database & Auth
@@ -76,11 +77,13 @@ family-budget-app/
 │   ├── layout.tsx         # Root layout
 │   └── providers.tsx      # Context providers
 ├── components/            # React components
+│   └── ui/aceternity/     # Aceternity UI components
 ├── lib/                   # Utility functions
 │   ├── auth.ts           # NextAuth configuration
 │   ├── db.ts             # Database client
 │   ├── prisma.ts         # Prisma client setup
-│   └── utils.ts          # General utilities
+│   ├── utils.ts          # General utilities
+│   └── aceternity-utils.ts # Aceternity UI utilities
 ├── prisma/               # Database schema and migrations
 │   ├── schema.prisma     # Database schema
 │   └── seed.ts          # Sample data seeding
@@ -275,6 +278,46 @@ docker compose ps   # Check service status
 - `/TECHNICAL_ROADMAP.md` - Architecture and implementation details
 - `/PRODUCT.md` - Feature specifications
 
+## UI Component System (Aceternity UI)
+
+The application uses **Aceternity UI** components for enhanced user experience with animations and modern interactions:
+
+### Core Components
+
+- **CardSpotlight** - Interactive cards with spotlight hover effects for income, expenses, and summaries
+- **StatefulButton** - Buttons with built-in loading and success states
+- **FloatingNavbar** - Auto-hiding navigation bar with smooth transitions
+- **ScenarioTabs** - Animated tabs for switching between budget scenarios
+- **AnimatedTooltip** - Contextual help tooltips with smooth animations
+- **MultiStepLoader** - Visual loading states for async operations
+- **ExpenseTimeline** - Timeline view for expense history
+
+### Usage Example
+
+```tsx
+import {
+  IncomeCardSpotlight,
+  StatefulButton,
+  AnimatedTooltip
+} from '@/components/ui/aceternity'
+
+// Card with spotlight effect
+<IncomeCardSpotlight className="p-6">
+  <h3>Total Income</h3>
+  <p>$8,500</p>
+</IncomeCardSpotlight>
+
+// Button with loading state
+<StatefulButton
+  onClick={handleSave}
+  loading={saving}
+  loadingText="Saving..."
+  successText="Saved!"
+>
+  Save Changes
+</StatefulButton>
+```
+
 ## Development Philosophy
 
 This application prioritizes **simplicity and clarity** over feature complexity:
@@ -286,3 +329,11 @@ This application prioritizes **simplicity and clarity** over feature complexity:
 - **Quick updates** rather than detailed data entry
 
 Focus on the core use case: families who want a clear monthly financial overview without the complexity of full expense tracking applications.
+
+## Docker Compose Tips
+
+- **To run any command inside docker compose, use `just exec`**
+
+## Development Command Memory
+
+- To start / restart the dev environment, use `just dev`

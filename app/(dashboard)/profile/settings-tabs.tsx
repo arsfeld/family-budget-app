@@ -5,6 +5,8 @@ import { User, Category } from '@prisma/client'
 import { ProfileForm } from './profile-form'
 import { FamilyMembers } from './family-members'
 import { CategoryManagement } from './category-management'
+import { AnimatedTabs } from '@/components/ui/aceternity'
+import { CardSpotlight } from '@/components/ui/aceternity'
 
 interface SettingsTabsProps {
   user: User & { family: { name: string; users: User[] } }
@@ -44,86 +46,116 @@ const tabs: Tab[] = [
 export function SettingsTabs({ user, categories }: SettingsTabsProps) {
   const [activeTab, setActiveTab] = useState<TabId>('profile')
 
+  const tabItems = tabs.map(tab => ({
+    id: tab.id,
+    label: (
+      <div className="flex items-center gap-2">
+        <span className="text-lg">{tab.icon}</span>
+        <span>{tab.label}</span>
+      </div>
+    ),
+    content: null as any, // We'll render content separately
+  }))
+
   return (
     <div className="flex flex-col gap-8 lg:flex-row">
       {/* Mobile Tab Navigation */}
       <div className="lg:hidden">
-        <div className="flex space-x-1 border-b">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex flex-1 items-center justify-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
-                activeTab === tab.id
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              <span>{tab.icon}</span>
-              <span>{tab.label}</span>
-            </button>
-          ))}
-        </div>
+        <AnimatedTabs
+          tabs={tabItems}
+          activeTab={activeTab}
+          onTabChange={(tabId) => setActiveTab(tabId as TabId)}
+          containerClassName="mb-6"
+        />
       </div>
 
       {/* Desktop Sidebar Navigation */}
-      <div className="hidden flex-shrink-0 lg:block lg:w-64">
-        <nav className="space-y-1">
+      <div className="hidden flex-shrink-0 lg:block lg:w-72">
+        <div className="sticky top-8 space-y-2">
           {tabs.map((tab) => (
-            <button
+            <div
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex w-full items-start gap-3 rounded-lg px-4 py-3 text-left transition-colors ${
-                activeTab === tab.id
-                  ? 'border-l-4 border-blue-700 bg-blue-50 text-blue-700'
-                  : 'text-gray-700 hover:bg-gray-50'
-              }`}
+              className="cursor-pointer"
             >
-              <span className="mt-0.5 text-xl">{tab.icon}</span>
-              <div>
-                <p className="font-medium">{tab.label}</p>
-                <p className="text-sm text-gray-600">{tab.description}</p>
-              </div>
-            </button>
+              <CardSpotlight
+                className={`group transition-colors ${
+                  activeTab === tab.id
+                    ? 'border-l-4 border-blue-600 bg-blue-50'
+                    : 'hover:bg-gray-50'
+                }`}
+              >
+                <div className="flex items-start gap-3 p-4">
+                  <span className="mt-0.5 text-xl transition-transform group-hover:scale-110">
+                    {tab.icon}
+                  </span>
+                  <div>
+                    <p className={`font-medium ${
+                      activeTab === tab.id ? 'text-blue-700' : 'text-gray-900'
+                    }`}>
+                      {tab.label}
+                    </p>
+                    <p className="text-sm text-gray-600">{tab.description}</p>
+                  </div>
+                </div>
+              </CardSpotlight>
+            </div>
           ))}
-        </nav>
+        </div>
       </div>
 
       {/* Content Area */}
       <div className="min-w-0 flex-1">
-        <div className="rounded-lg border bg-white p-6 shadow-sm">
-          {activeTab === 'profile' && (
-            <>
-              <div className="mb-6">
-                <h2 className="text-lg font-semibold">My Profile</h2>
-              </div>
-              <ProfileForm user={user} />
-            </>
-          )}
+        <CardSpotlight className="overflow-hidden">
+          <div className="p-6">
+            {activeTab === 'profile' && (
+              <>
+                <div className="mb-6 border-b pb-4">
+                  <h2 className="text-2xl font-semibold text-gray-900">
+                    My Profile
+                  </h2>
+                  <p className="mt-1 text-sm text-gray-600">
+                    Update your personal information and account settings
+                  </p>
+                </div>
+                <ProfileForm user={user} />
+              </>
+            )}
 
-          {activeTab === 'family' && (
-            <>
-              <div className="mb-6">
-                <h2 className="text-lg font-semibold">Family Members</h2>
-              </div>
-              <FamilyMembers
-                familyId={user.familyId}
-                familyName={user.family.name}
-                members={user.family.users}
-                currentUserId={user.id}
-              />
-            </>
-          )}
+            {activeTab === 'family' && (
+              <>
+                <div className="mb-6 border-b pb-4">
+                  <h2 className="text-2xl font-semibold text-gray-900">
+                    Family Members
+                  </h2>
+                  <p className="mt-1 text-sm text-gray-600">
+                    Manage who has access to your family budget
+                  </p>
+                </div>
+                <FamilyMembers
+                  familyId={user.familyId}
+                  familyName={user.family.name}
+                  members={user.family.users}
+                  currentUserId={user.id}
+                />
+              </>
+            )}
 
-          {activeTab === 'categories' && (
-            <>
-              <div className="mb-6">
-                <h2 className="text-lg font-semibold">Expense Categories</h2>
-              </div>
-              <CategoryManagement categories={categories} />
-            </>
-          )}
-        </div>
+            {activeTab === 'categories' && (
+              <>
+                <div className="mb-6 border-b pb-4">
+                  <h2 className="text-2xl font-semibold text-gray-900">
+                    Expense Categories
+                  </h2>
+                  <p className="mt-1 text-sm text-gray-600">
+                    Customize categories to organize your expenses
+                  </p>
+                </div>
+                <CategoryManagement categories={categories} />
+              </>
+            )}
+          </div>
+        </CardSpotlight>
       </div>
     </div>
   )

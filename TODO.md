@@ -168,6 +168,29 @@
 
 12. 🔄 Next focus: Visual polish and export features
 
+## 🎨 UI Migration to Aceternity UI
+
+### Overview
+Migrating the Family Budget App from custom design system to Aceternity UI components for enhanced animations and modern UI patterns.
+
+### Prerequisites
+- [ ] Install Aceternity UI dependencies (framer-motion)
+- [ ] Set up Aceternity UI utilities and configuration
+
+### Component Migration
+- [ ] Migrate Card components (Income/Expense/Summary) to Aceternity Card Spotlight
+- [ ] Replace custom buttons with Aceternity Stateful Button
+- [ ] Implement Aceternity Floating Navbar to replace current navbar
+- [ ] Add Aceternity Animated Tabs for budget scenario switching
+- [ ] Replace loading skeletons with Aceternity Multi Step Loader
+- [ ] Implement Aceternity Animated Tooltip for help text
+- [ ] Add Aceternity Timeline for expense history view
+- [ ] Update color scheme to work with Aceternity dark/light mode
+
+### Testing & Documentation
+- [ ] Test all migrated components for functionality
+- [ ] Update documentation with new component usage
+
 ## 📝 Key Principles
 
 - **Single page focus** - Everything visible at once

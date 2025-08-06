@@ -30,7 +30,7 @@ shell:
     docker compose exec app sh
 
 # Run arbitrary command in app container
-dc *args:
+exec *args:
     docker compose exec app {{args}}
 
 # Run npm script in app container

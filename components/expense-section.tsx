@@ -2,15 +2,18 @@
 
 import { useState } from 'react'
 import {
-  CardExpense,
   HeadingSection,
   CurrencyDisplay,
   InputCurrency,
   StatusIndicator,
   EmptyState,
-  ButtonPrimary,
   AnimateIn,
 } from '@/components/ui/design-system'
+import {
+  ExpenseCardSpotlight,
+  StatefulButton,
+  AnimatedTooltip,
+} from '@/components/ui/aceternity'
 import { Edit2, Trash2, Plus } from 'lucide-react'
 
 interface Category {
@@ -246,7 +249,7 @@ export function ExpenseSection({
 
       {showAddForm && (
         <AnimateIn>
-          <CardExpense className="border-expense-primary/30 bg-expense-primary/5 mb-6 border-2">
+          <ExpenseCardSpotlight className="border-amber-500/30 bg-gradient-to-br from-amber-50/50 to-white mb-6 border-2 p-6">
             <h3 className="mb-4 text-lg font-semibold text-gray-900">
               Add New Expense
             </h3>
@@ -385,16 +388,19 @@ export function ExpenseSection({
                 >
                   Cancel
                 </button>
-                <ButtonPrimary
+                <StatefulButton
                   onClick={addNewExpense}
                   disabled={saving || !newExpense.amount || !newExpense.name}
-                  className="bg-expense-primary hover:bg-expense-primary/90"
+                  loading={saving}
+                  loadingText="Adding..."
+                  successText="Added!"
+                  variant="success"
                 >
-                  {saving ? 'Adding...' : 'Add Expense'}
-                </ButtonPrimary>
+                  Add Expense
+                </StatefulButton>
               </div>
             </div>
-          </CardExpense>
+          </ExpenseCardSpotlight>
         </AnimateIn>
       )}
 
@@ -405,7 +411,7 @@ export function ExpenseSection({
 
           return (
             <AnimateIn key={userId} delay={index * 100}>
-              <CardExpense>
+              <ExpenseCardSpotlight className="p-6">
                 <div className="mb-4 flex items-center justify-between">
                   <h3 className="text-lg font-semibold text-gray-900">
                     {user?.name}
@@ -528,13 +534,17 @@ export function ExpenseSection({
                               >
                                 Cancel
                               </button>
-                              <ButtonPrimary
+                              <StatefulButton
                                 onClick={() => saveChanges(expense.id)}
                                 disabled={saving}
-                                className="bg-expense-primary hover:bg-expense-primary/90"
+                                loading={saving}
+                                loadingText="Saving..."
+                                successText="Saved!"
+                                variant="success"
+                                size="sm"
                               >
                                 Save
-                              </ButtonPrimary>
+                              </StatefulButton>
                             </div>
                           </div>
                         </div>
@@ -593,7 +603,7 @@ export function ExpenseSection({
                     )
                   })}
                 </div>
-              </CardExpense>
+              </ExpenseCardSpotlight>
             </AnimateIn>
           )
         })}

@@ -300,13 +300,16 @@ export async function deleteMonthlyOverview(overviewId: string) {
     throw new Error('Overview not found')
   }
 
-  // Don't allow deleting the last overview
+  // Don't allow deleting the last non-archived overview
   const overviewCount = await db.monthlyOverview.count({
-    where: { familyId: session.user.familyId },
+    where: {
+      familyId: session.user.familyId,
+      isArchived: false,
+    },
   })
 
-  if (overviewCount <= 1) {
-    throw new Error('Cannot delete the last overview')
+  if (overviewCount <= 1 && !overview.isArchived) {
+    throw new Error('Cannot delete the last active overview')
   }
 
   // Delete the overview (cascade will handle related records)
@@ -317,7 +320,10 @@ export async function deleteMonthlyOverview(overviewId: string) {
   // If this was the active overview, activate another one
   if (overview.isActive) {
     const firstOverview = await db.monthlyOverview.findFirst({
-      where: { familyId: session.user.familyId },
+      where: {
+        familyId: session.user.familyId,
+        isArchived: false,
+      },
       orderBy: { createdAt: 'desc' },
     })
 
@@ -327,6 +333,155 @@ export async function deleteMonthlyOverview(overviewId: string) {
         data: { isActive: true },
       })
     }
+  }
+
+  revalidatePath('/dashboard')
+}
+
+export async function archiveMonthlyOverview(overviewId: string) {
+  const session = await auth()
+  if (!session?.user?.familyId) {
+    throw new Error('Unauthorized')
+  }
+
+  // Verify the overview belongs to the user's family
+  const overview = await db.monthlyOverview.findFirst({
+    where: {
+      id: overviewId,
+      familyId: session.user.familyId,
+    },
+  })
+
+  if (!overview) {
+    throw new Error('Overview not found')
+  }
+
+  // Don't allow archiving the active overview
+  if (overview.isActive) {
+    throw new Error('Cannot archive the active overview. Switch to another overview first.')
+  }
+
+  // Archive the overview
+  await db.monthlyOverview.update({
+    where: { id: overviewId },
+    data: {
+      isArchived: true,
+      archivedAt: new Date(),
+    },
+  })
+
+  revalidatePath('/dashboard')
+}
+
+export async function unarchiveMonthlyOverview(overviewId: string) {
+  const session = await auth()
+  if (!session?.user?.familyId) {
+    throw new Error('Unauthorized')
+  }
+
+  // Verify the overview belongs to the user's family
+  const overview = await db.monthlyOverview.findFirst({
+    where: {
+      id: overviewId,
+      familyId: session.user.familyId,
+    },
+  })
+
+  if (!overview) {
+    throw new Error('Overview not found')
+  }
+
+  // Unarchive the overview
+  await db.monthlyOverview.update({
+    where: { id: overviewId },
+    data: {
+      isArchived: false,
+      archivedAt: null,
+    },
+  })
+
+  revalidatePath('/dashboard')
+}
+
+export async function cloneMonthlyOverview(
+  name: string,
+  cloneFromId?: string
+) {
+  const session = await auth()
+  if (!session?.user?.familyId) {
+    throw new Error('Unauthorized')
+  }
+
+  // If cloning from an existing overview, verify it belongs to the user's family
+  if (cloneFromId) {
+    const sourceOverview = await db.monthlyOverview.findFirst({
+      where: {
+        id: cloneFromId,
+        familyId: session.user.familyId,
+      },
+      include: {
+        userIncome: true,
+        userExpenses: true,
+      },
+    })
+
+    if (!sourceOverview) {
+      throw new Error('Source overview not found')
+    }
+
+    // Create the new overview with cloned data
+    await db.$transaction(async (tx) => {
+      // First, set all existing overviews to inactive
+      await tx.monthlyOverview.updateMany({
+        where: { familyId: session.user.familyId },
+        data: { isActive: false },
+      })
+
+      // Create the new overview
+      const overview = await tx.monthlyOverview.create({
+        data: {
+          familyId: session.user.familyId,
+          name,
+          isActive: true,
+        },
+      })
+
+      // Clone income entries
+      if (sourceOverview.userIncome.length > 0) {
+        await tx.userIncome.createMany({
+          data: sourceOverview.userIncome.map((income) => ({
+            overviewId: overview.id,
+            userId: income.userId,
+            salaryAmount: income.salaryAmount,
+            salaryFrequency: income.salaryFrequency,
+            monthlySalary: income.monthlySalary,
+            additionalIncome: income.additionalIncome,
+            notes: income.notes,
+          })),
+        })
+      }
+
+      // Clone expense entries
+      if (sourceOverview.userExpenses.length > 0) {
+        await tx.userExpense.createMany({
+          data: sourceOverview.userExpenses.map((expense) => ({
+            overviewId: overview.id,
+            userId: expense.userId,
+            categoryId: expense.categoryId,
+            name: expense.name,
+            amount: expense.amount,
+            isShared: expense.isShared,
+            sharePercentage: expense.sharePercentage,
+            notes: expense.notes,
+          })),
+        })
+      }
+    })
+  } else {
+    // Create a new overview without cloning
+    const formData = new FormData()
+    formData.append('name', name)
+    await createMonthlyOverview(formData)
   }
 
   revalidatePath('/dashboard')

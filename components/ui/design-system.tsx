@@ -109,29 +109,33 @@ export function CurrencyDisplay({
   ...props
 }: CurrencyDisplayProps) {
   const sizeClasses = {
-    default: 'text-currency font-mono',
-    large: 'text-currency-lg font-mono',
-    xlarge: 'text-4xl font-mono font-bold',
+    default: 'text-2xl font-semibold',
+    large: 'text-3xl font-bold',
+    xlarge: 'text-4xl font-bold tracking-tight',
   }
 
   const colorClasses = {
-    default: 'text-gray-800',
-    income: 'text-income-dark',
-    expense: 'text-expense-dark',
+    default: 'text-gray-900',
+    income: 'text-emerald-600',
+    expense: 'text-amber-600',
   }
+
+  const isNegative = value < 0
+  const displayValue = Math.abs(value)
 
   return (
     <span
       className={cn(
         sizeClasses[size],
         colorClasses[color],
-        'tabular-nums',
+        'tabular-nums font-mono',
+        'transition-all duration-300',
         className
       )}
       {...props}
     >
-      $
-      {value.toLocaleString('en-US', {
+      {isNegative && '-'}$
+      {displayValue.toLocaleString('en-US', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
       })}

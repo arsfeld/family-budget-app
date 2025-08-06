@@ -4,24 +4,27 @@ import { useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { LogoutButton } from './logout-button'
+import { ScenarioDialog } from './scenario-dialog'
 import {
-  Plus,
-  Settings,
-  Trash2,
+  Settings as SettingsIcon,
   ChevronDown,
   LayoutDashboard,
   User,
 } from 'lucide-react'
 import {
-  createMonthlyOverview,
   switchMonthlyOverview,
   deleteMonthlyOverview,
+  archiveMonthlyOverview,
+  unarchiveMonthlyOverview,
+  cloneMonthlyOverview,
 } from '@/app/(dashboard)/dashboard/actions'
 
 interface MonthlyOverview {
   id: string
   name: string
   isActive: boolean
+  isArchived: boolean
+  archivedAt: Date | null
   createdAt: Date
 }
 
@@ -39,32 +42,23 @@ export function NavbarIntegrated({
 }: NavbarIntegratedProps) {
   const router = useRouter()
   const pathname = usePathname()
-  const [showCreateForm, setShowCreateForm] = useState(false)
-  const [newOverviewName, setNewOverviewName] = useState('')
-  const [creating, setCreating] = useState(false)
+  const [showScenarioDialog, setShowScenarioDialog] = useState(false)
   const [switching, setSwitching] = useState<string | null>(null)
 
+  // Filter out archived scenarios for the dropdown
+  const activeScenarios = overviews.filter((o) => !o.isArchived)
   const activeOverview = overviews.find((o) => o.isActive)
   const isDashboard = pathname === '/dashboard'
 
-  const handleCreate = async () => {
-    if (!newOverviewName.trim()) return
-
-    setCreating(true)
+  const handleCreate = async (name: string, cloneFromId?: string) => {
     try {
-      const formData = new FormData()
-      formData.append('name', newOverviewName)
-      await createMonthlyOverview(formData)
-      setNewOverviewName('')
-      setShowCreateForm(false)
+      await cloneMonthlyOverview(name, cloneFromId)
       router.refresh()
     } catch (error) {
       console.error('Failed to create overview:', error)
       alert(
         error instanceof Error ? error.message : 'Failed to create overview'
       )
-    } finally {
-      setCreating(false)
     }
   }
 
@@ -81,20 +75,38 @@ export function NavbarIntegrated({
   }
 
   const handleDelete = async (overviewId: string) => {
-    const overview = overviews.find((o) => o.id === overviewId)
-    if (
-      !confirm(
-        `Are you sure you want to delete "${overview?.name}"? This will remove all income and expense data for this scenario.`
-      )
-    ) {
-      return
-    }
-
     try {
       await deleteMonthlyOverview(overviewId)
       router.refresh()
     } catch (error) {
       console.error('Failed to delete overview:', error)
+      alert(
+        error instanceof Error ? error.message : 'Failed to delete overview'
+      )
+    }
+  }
+
+  const handleArchive = async (overviewId: string) => {
+    try {
+      await archiveMonthlyOverview(overviewId)
+      router.refresh()
+    } catch (error) {
+      console.error('Failed to archive overview:', error)
+      alert(
+        error instanceof Error ? error.message : 'Failed to archive overview'
+      )
+    }
+  }
+
+  const handleUnarchive = async (overviewId: string) => {
+    try {
+      await unarchiveMonthlyOverview(overviewId)
+      router.refresh()
+    } catch (error) {
+      console.error('Failed to unarchive overview:', error)
+      alert(
+        error instanceof Error ? error.message : 'Failed to unarchive overview'
+      )
     }
   }
 
@@ -104,7 +116,7 @@ export function NavbarIntegrated({
         <div className="flex h-16 items-center justify-between">
           {/* Left side */}
           <div className="flex items-center gap-6">
-            {isDashboard && overviews.length > 0 ? (
+            {isDashboard && activeScenarios.length > 0 ? (
               <>
                 {/* Budget Scenario Dropdown */}
                 <div className="relative">
@@ -128,7 +140,7 @@ export function NavbarIntegrated({
                     disabled={switching !== null}
                     className="absolute inset-0 cursor-pointer opacity-0"
                   >
-                    {overviews.map((overview) => (
+                    {activeScenarios.map((overview) => (
                       <option key={overview.id} value={overview.id}>
                         {overview.name}
                       </option>
@@ -143,61 +155,14 @@ export function NavbarIntegrated({
                   )}
                 </div>
 
-                {/* New Scenario Button */}
-                {showCreateForm ? (
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      value={newOverviewName}
-                      onChange={(e) => setNewOverviewName(e.target.value)}
-                      placeholder="Scenario name..."
-                      className="focus:border-brand-primary rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm transition-all duration-200 placeholder:text-gray-400 hover:border-gray-300 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)] focus:outline-none"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleCreate()
-                        if (e.key === 'Escape') {
-                          setShowCreateForm(false)
-                          setNewOverviewName('')
-                        }
-                      }}
-                      autoFocus
-                    />
-                    <button
-                      onClick={handleCreate}
-                      disabled={creating || !newOverviewName.trim()}
-                      className="bg-brand-primary hover:bg-brand-primary/90 rounded-lg px-3 py-1.5 text-sm font-medium text-white transition-all duration-200 disabled:opacity-50"
-                    >
-                      {creating ? '...' : 'Create'}
-                    </button>
-                    <button
-                      onClick={() => {
-                        setShowCreateForm(false)
-                        setNewOverviewName('')
-                      }}
-                      className="px-2 py-1.5 text-sm text-gray-600 transition-colors hover:text-gray-800"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => setShowCreateForm(true)}
-                    className="text-brand-primary hover:bg-brand-primary/5 flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm transition-all duration-200"
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                    <span className="font-medium">New Scenario</span>
-                  </button>
-                )}
-
-                {/* Delete button for current scenario */}
-                {overviews.length > 1 && activeOverview && (
-                  <button
-                    onClick={() => handleDelete(activeOverview.id)}
-                    className="rounded-lg p-1.5 text-gray-500 transition-all duration-200 hover:bg-red-50 hover:text-red-600"
-                    title="Delete current scenario"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                )}
+                {/* Manage Scenarios Button */}
+                <button
+                  onClick={() => setShowScenarioDialog(true)}
+                  className="text-brand-primary hover:bg-brand-primary/5 flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm transition-all duration-200"
+                >
+                  <SettingsIcon className="h-3.5 w-3.5" />
+                  <span className="font-medium">Manage</span>
+                </button>
               </>
             ) : (
               <h1 className="text-xl font-semibold text-gray-900">
@@ -229,7 +194,7 @@ export function NavbarIntegrated({
                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                 }`}
               >
-                <Settings className="h-4 w-4" />
+                <SettingsIcon className="h-4 w-4" />
                 Settings
               </Link>
             </div>
@@ -254,7 +219,7 @@ export function NavbarIntegrated({
                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                 }`}
               >
-                <Settings className="h-4 w-4" />
+                <SettingsIcon className="h-4 w-4" />
               </Link>
             </div>
 
@@ -269,6 +234,19 @@ export function NavbarIntegrated({
           </div>
         </div>
       </div>
+
+      {/* Scenario Management Dialog */}
+      <ScenarioDialog
+        isOpen={showScenarioDialog}
+        onClose={() => setShowScenarioDialog(false)}
+        overviews={overviews}
+        activeOverviewId={activeOverview?.id}
+        onSwitch={handleSwitch}
+        onCreate={handleCreate}
+        onDelete={handleDelete}
+        onArchive={handleArchive}
+        onUnarchive={handleUnarchive}
+      />
     </nav>
   )
 }

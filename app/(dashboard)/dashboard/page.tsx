@@ -8,8 +8,14 @@ import {
   CurrencyDisplay,
   AnimateIn,
   EmptyState,
-  ButtonPrimary,
 } from '@/components/ui/design-system'
+import {
+  IncomeCardSpotlight,
+  ExpenseCardSpotlight,
+  SummaryCardSpotlight,
+  PrimaryButton,
+  CardSkeletonLoader,
+} from '@/components/ui/aceternity'
 import {
   updateUserIncome,
   updateUserExpense,
@@ -54,6 +60,8 @@ async function getOverviewData(familyId: string) {
         id: true,
         name: true,
         isActive: true,
+        isArchived: true,
+        archivedAt: true,
         createdAt: true,
       },
     }),
@@ -129,8 +137,10 @@ export default async function DashboardPage() {
   // If no overviews exist, show the create form
   if (allOverviews.length === 0) {
     return (
-      <div className="bg-surface-base min-h-screen">
-        <div className="container mx-auto max-w-4xl p-6">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50/50">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-100/20 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-emerald-100/20 via-transparent to-transparent" />
+        <div className="container relative mx-auto max-w-4xl p-6">
           <AnimateIn>
             <EmptyState
               title="Welcome to Your Family Budget"
@@ -148,11 +158,11 @@ export default async function DashboardPage() {
                       type="text"
                       name="name"
                       placeholder="e.g., Current Budget, 2024 Plan"
-                      className="shadow-inner-subtle focus:border-brand-primary flex-1 rounded-lg border-2 border-transparent bg-white px-4 py-3 transition-all duration-200 placeholder:text-gray-400 hover:border-gray-300 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)] focus:outline-none"
+                      className="flex-1 rounded-xl border border-gray-200/50 bg-white/80 px-5 py-3.5 backdrop-blur-sm transition-all duration-200 placeholder:text-gray-400 hover:border-gray-300/50 hover:bg-white/90 focus:border-indigo-300 focus:bg-white focus:shadow-[0_0_0_3px_rgba(99,102,241,0.08)] focus:outline-none"
                       required
                       autoFocus
                     />
-                    <ButtonPrimary type="submit">Create</ButtonPrimary>
+                    <PrimaryButton type="submit">Create</PrimaryButton>
                   </div>
                   <p className="mt-3 text-center text-xs text-gray-500">
                     You can create multiple scenarios later to compare different
@@ -199,8 +209,10 @@ export default async function DashboardPage() {
   const remainingBudget = totalIncome - totalExpenses
 
   return (
-    <div className="bg-surface-base min-h-screen">
-      <div className="container mx-auto max-w-6xl p-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50/50">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-100/20 via-transparent to-transparent" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-emerald-100/20 via-transparent to-transparent" />
+      <div className="container relative mx-auto max-w-6xl p-6">
         {!overview ? (
           <AnimateIn delay={200}>
             <EmptyState
@@ -212,60 +224,53 @@ export default async function DashboardPage() {
         ) : (
           <>
             {/* Summary Cards */}
-            <div className="mb-8 grid gap-6 md:grid-cols-3">
+            <div className="mb-10 grid gap-6 md:grid-cols-3">
               <AnimateIn delay={200}>
-                <CardSummary className="relative h-full overflow-hidden">
-                  <div className="bg-income-primary/10 absolute top-0 right-0 -mt-12 -mr-12 h-24 w-24 rounded-full" />
-                  <div className="relative">
-                    <p className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                      Total Income
-                    </p>
-                    <CurrencyDisplay
-                      value={totalIncome}
-                      size="xlarge"
-                      color="income"
-                    />
-                    <p className="mt-3 text-sm text-gray-600">Monthly</p>
-                  </div>
-                </CardSummary>
+                <IncomeCardSpotlight className="p-8">
+                  <p className="mb-3 text-[11px] font-semibold tracking-[0.08em] text-emerald-700/60 uppercase">
+                    Total Income
+                  </p>
+                  <CurrencyDisplay
+                    value={totalIncome}
+                    size="xlarge"
+                    color="income"
+                  />
+                  <p className="mt-4 text-sm font-medium text-emerald-600/70">Monthly revenue</p>
+                </IncomeCardSpotlight>
               </AnimateIn>
 
               <AnimateIn delay={300}>
-                <CardSummary className="relative h-full overflow-hidden">
-                  <div className="bg-expense-primary/10 absolute top-0 right-0 -mt-12 -mr-12 h-24 w-24 rounded-full" />
-                  <div className="relative">
-                    <p className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                      Total Expenses
-                    </p>
-                    <CurrencyDisplay
-                      value={totalExpenses}
-                      size="xlarge"
-                      color="expense"
-                    />
-                    <p className="mt-3 text-sm text-gray-600">Fixed costs</p>
-                  </div>
-                </CardSummary>
+                <ExpenseCardSpotlight className="p-8">
+                  <p className="mb-3 text-[11px] font-semibold tracking-[0.08em] text-amber-700/60 uppercase">
+                    Total Expenses
+                  </p>
+                  <CurrencyDisplay
+                    value={totalExpenses}
+                    size="xlarge"
+                    color="expense"
+                  />
+                  <p className="mt-4 text-sm font-medium text-amber-600/70">Fixed costs</p>
+                </ExpenseCardSpotlight>
               </AnimateIn>
 
               <AnimateIn delay={400}>
-                <CardSummary className="relative h-full overflow-hidden">
-                  <div className="bg-brand-primary/10 absolute top-0 right-0 -mt-12 -mr-12 h-24 w-24 rounded-full" />
-                  <div className="relative">
-                    <p className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                      Remaining
-                    </p>
-                    <CurrencyDisplay
-                      value={remainingBudget}
-                      size="xlarge"
-                      color={remainingBudget >= 0 ? 'income' : 'expense'}
-                    />
-                    <p className="mt-3 text-sm text-gray-600">
-                      {totalIncome > 0
-                        ? `${((remainingBudget / totalIncome) * 100).toFixed(1)}% of income`
-                        : '0% of income'}
-                    </p>
-                  </div>
-                </CardSummary>
+                <SummaryCardSpotlight className="p-8" isPositive={remainingBudget >= 0}>
+                  <p className="mb-3 text-[11px] font-semibold tracking-[0.08em] uppercase"
+                     style={{ color: remainingBudget >= 0 ? 'rgb(99 102 241 / 0.6)' : 'rgb(244 63 94 / 0.6)' }}>
+                    Balance
+                  </p>
+                  <CurrencyDisplay
+                    value={remainingBudget}
+                    size="xlarge"
+                    color={remainingBudget >= 0 ? 'income' : 'expense'}
+                  />
+                  <p className="mt-4 text-sm font-medium"
+                     style={{ color: remainingBudget >= 0 ? 'rgb(99 102 241 / 0.7)' : 'rgb(244 63 94 / 0.7)' }}>
+                    {totalIncome > 0
+                      ? `${((remainingBudget / totalIncome) * 100).toFixed(1)}% of income`
+                      : '0% of income'}
+                  </p>
+                </SummaryCardSpotlight>
               </AnimateIn>
             </div>
 
@@ -313,12 +318,12 @@ export default async function DashboardPage() {
             {/* Bottom Actions */}
             <AnimateIn delay={700}>
               <div className="mt-12 flex justify-center gap-4">
-                <button className="rounded-lg border-2 border-gray-200 bg-white px-6 py-3 font-medium text-gray-700 transition-all duration-200 hover:bg-gray-50 hover:shadow-sm">
+                <button className="rounded-xl border border-gray-200/50 bg-white/60 px-7 py-3.5 font-medium text-gray-700 backdrop-blur-sm transition-all duration-200 hover:bg-white/80 hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)]">
                   Edit Overview
                 </button>
-                <ButtonPrimary className="bg-income-primary hover:bg-income-primary/90">
+                <PrimaryButton className="rounded-xl px-7 py-3.5">
                   Export PDF
-                </ButtonPrimary>
+                </PrimaryButton>
               </div>
             </AnimateIn>
           </>

@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { redirect } from 'next/navigation'
 import { SettingsTabs } from './settings-tabs'
+import Link from 'next/link'
 
 export default async function ProfilePage() {
   const session = await auth()
@@ -36,19 +37,25 @@ export default async function ProfilePage() {
   })
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
       <div className="container mx-auto max-w-7xl px-6 py-8">
-        {/* Breadcrumb */}
-        <div className="mb-6 flex items-center gap-2 text-sm text-gray-600">
-          <a href="/dashboard" className="hover:text-gray-900">
+        {/* Breadcrumb with smoother styling */}
+        <div className="mb-6 flex items-center gap-2 text-sm">
+          <Link 
+            href="/dashboard" 
+            className="text-gray-500 transition-colors hover:text-gray-900"
+          >
             Dashboard
-          </a>
-          <span>/</span>
-          <span className="text-gray-900">Settings</span>
+          </Link>
+          <span className="text-gray-400">/</span>
+          <span className="font-medium text-gray-900">Settings</span>
         </div>
 
         <div className="mb-8">
-          <h1 className="text-3xl font-bold">Settings</h1>
+          <h1 className="bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-4xl font-bold text-transparent">
+            Settings
+          </h1>
+          <p className="mt-2 text-gray-600">Manage your profile, family, and preferences</p>
         </div>
 
         <SettingsTabs user={user} categories={categories} />

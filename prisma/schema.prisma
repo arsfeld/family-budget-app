@@ -41,17 +41,20 @@ model User {
 
 // Monthly Overviews (multiple scenarios per family)
 model MonthlyOverview {
-  id        String   @id @default(cuid())
-  familyId  String
-  name      String   // e.g., "Current", "Planned", "Conservative"
-  isActive  Boolean  @default(false)
-  createdAt DateTime @default(now())
+  id         String    @id @default(cuid())
+  familyId   String
+  name       String    // e.g., "Current", "Planned", "Conservative"
+  isActive   Boolean   @default(false)
+  isArchived Boolean   @default(false)
+  archivedAt DateTime?
+  createdAt  DateTime  @default(now())
   
   family       Family        @relation(fields: [familyId], references: [id])
   userIncome   UserIncome[]
   userExpenses UserExpense[]
   
   @@index([familyId, isActive])
+  @@index([familyId, isArchived])
 }
 
 // User Income (monthly salaries and additional income)

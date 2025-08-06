@@ -155,6 +155,54 @@ const config = {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-10px)' },
         },
+        'fade-in-0': {
+          from: { opacity: '0' },
+          to: { opacity: '1' },
+        },
+        'zoom-in-95': {
+          from: { opacity: '0', transform: 'scale(0.95)' },
+          to: { opacity: '1', transform: 'scale(1)' },
+        },
+        // Aceternity UI animations
+        spotlight: {
+          '0%': {
+            opacity: '0',
+            transform: 'translate(-72%, -62%) scale(0.5)',
+          },
+          '100%': {
+            opacity: '1',
+            transform: 'translate(-50%,-40%) scale(1)',
+          },
+        },
+        'meteor-effect': {
+          '0%': { transform: 'rotate(215deg) translateX(0)', opacity: '1' },
+          '70%': { opacity: '1' },
+          '100%': {
+            transform: 'rotate(215deg) translateX(-500px)',
+            opacity: '0',
+          },
+        },
+        scroll: {
+          to: {
+            transform: 'translate(calc(-50% - 0.5rem))',
+          },
+        },
+        'move-up': {
+          '0%': { transform: 'translateY(100%)' },
+          '100%': { transform: 'translateY(0)' },
+        },
+        'move-down': {
+          '0%': { transform: 'translateY(-100%)' },
+          '100%': { transform: 'translateY(0)' },
+        },
+        aurora: {
+          from: {
+            backgroundPosition: '50% 50%, 50% 50%',
+          },
+          to: {
+            backgroundPosition: '350% 50%, 350% 50%',
+          },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -165,6 +213,16 @@ const config = {
         'slide-in': 'slide-in 0.3s ease-out forwards',
         shimmer: 'shimmer 1.5s infinite',
         float: 'float 3s ease-in-out infinite',
+        'fade-in-0': 'fade-in-0 200ms ease-out',
+        'zoom-in-95': 'zoom-in-95 200ms ease-out',
+        // Aceternity UI animations
+        spotlight: 'spotlight 2s ease .75s 1 forwards',
+        'meteor-effect': 'meteor-effect 5s linear infinite',
+        scroll:
+          'scroll var(--animation-duration, 40s) var(--animation-direction, forwards) linear infinite',
+        'move-up': 'move-up 500ms ease-in-out',
+        'move-down': 'move-down 500ms ease-in-out',
+        aurora: 'aurora 60s linear infinite',
       },
       transitionTimingFunction: {
         smooth: 'cubic-bezier(0.4, 0, 0.2, 1)',

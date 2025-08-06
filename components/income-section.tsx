@@ -8,13 +8,16 @@ import {
   type SalaryFrequency,
 } from '@/lib/utils'
 import {
-  CardIncome,
   HeadingSection,
   CurrencyDisplay,
   StatusIndicator,
   EmptyState,
-  ButtonPrimary,
 } from '@/components/ui/design-system'
+import {
+  IncomeCardSpotlight,
+  StatefulButton,
+  HelpTooltip,
+} from '@/components/ui/aceternity'
 import { Edit2 } from 'lucide-react'
 
 interface UserIncome {
@@ -130,9 +133,9 @@ export function IncomeSection({ userIncomes, onUpdate }: IncomeSectionProps) {
 
           if (isEditing) {
             return (
-              <CardIncome
+              <IncomeCardSpotlight
                 key={income.id}
-                className="border-brand-primary/30 bg-brand-primary/5 border-2"
+                className="border-indigo-500/30 bg-gradient-to-br from-indigo-50/50 to-white border-2 p-6"
               >
                 <div className="space-y-3">
                   <div>
@@ -224,22 +227,27 @@ export function IncomeSection({ userIncomes, onUpdate }: IncomeSectionProps) {
                     >
                       Cancel
                     </button>
-                    <ButtonPrimary
+                    <StatefulButton
                       onClick={() => saveChanges(income.id)}
                       disabled={saving}
+                      loading={saving}
+                      loadingText="Saving..."
+                      successText="Saved!"
+                      variant="success"
+                      size="sm"
                     >
-                      {saving ? 'Saving...' : 'Save'}
-                    </ButtonPrimary>
+                      Save
+                    </StatefulButton>
                   </div>
                 </div>
-              </CardIncome>
+              </IncomeCardSpotlight>
             )
           }
 
           return (
-            <CardIncome
+            <IncomeCardSpotlight
               key={income.id}
-              className="group flex items-center justify-between"
+              className="group flex items-center justify-between p-6"
             >
               <div className="flex-1">
                 <p className="font-medium text-gray-900">
@@ -276,7 +284,7 @@ export function IncomeSection({ userIncomes, onUpdate }: IncomeSectionProps) {
                   <Edit2 className="h-4 w-4 text-gray-500 transition-colors hover:text-gray-700" />
                 </button>
               </div>
-            </CardIncome>
+            </IncomeCardSpotlight>
           )
         })}
       </div>
