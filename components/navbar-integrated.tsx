@@ -12,6 +12,11 @@ import {
   LayoutDashboard,
   User,
 } from 'lucide-react'
+import {
+  createMonthlyOverview,
+  switchMonthlyOverview,
+  deleteMonthlyOverview,
+} from '@/app/(dashboard)/dashboard/actions'
 
 interface MonthlyOverview {
   id: string
@@ -26,17 +31,11 @@ interface NavbarIntegratedProps {
     email: string | null
   }
   overviews?: MonthlyOverview[]
-  onCreateOverview?: (name: string) => Promise<void>
-  onSwitchOverview?: (overviewId: string) => Promise<void>
-  onDeleteOverview?: (overviewId: string) => Promise<void>
 }
 
 export function NavbarIntegrated({
   user,
   overviews = [],
-  onCreateOverview,
-  onSwitchOverview,
-  onDeleteOverview,
 }: NavbarIntegratedProps) {
   const router = useRouter()
   const pathname = usePathname()
@@ -49,11 +48,13 @@ export function NavbarIntegrated({
   const isDashboard = pathname === '/dashboard'
 
   const handleCreate = async () => {
-    if (!newOverviewName.trim() || !onCreateOverview) return
+    if (!newOverviewName.trim()) return
 
     setCreating(true)
     try {
-      await onCreateOverview(newOverviewName)
+      const formData = new FormData()
+      formData.append('name', newOverviewName)
+      await createMonthlyOverview(formData)
       setNewOverviewName('')
       setShowCreateForm(false)
       router.refresh()
@@ -68,10 +69,9 @@ export function NavbarIntegrated({
   }
 
   const handleSwitch = async (overviewId: string) => {
-    if (!onSwitchOverview) return
     setSwitching(overviewId)
     try {
-      await onSwitchOverview(overviewId)
+      await switchMonthlyOverview(overviewId)
       router.refresh()
     } catch (error) {
       console.error('Failed to switch overview:', error)
@@ -81,7 +81,6 @@ export function NavbarIntegrated({
   }
 
   const handleDelete = async (overviewId: string) => {
-    if (!onDeleteOverview) return
     const overview = overviews.find((o) => o.id === overviewId)
     if (
       !confirm(
@@ -92,7 +91,7 @@ export function NavbarIntegrated({
     }
 
     try {
-      await onDeleteOverview(overviewId)
+      await deleteMonthlyOverview(overviewId)
       router.refresh()
     } catch (error) {
       console.error('Failed to delete overview:', error)
