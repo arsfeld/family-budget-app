@@ -9,7 +9,7 @@ primary_region = 'yyz'
 [build]
 
 [deploy]
-  release_command = 'node node_modules/prisma/build/index.js migrate deploy'
+  release_command = 'prisma migrate deploy'
   seed_command = 'tsx prisma/seed.ts'
 
 [http_service]
