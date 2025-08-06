@@ -168,15 +168,25 @@ export default function LoginPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6 }}
-              className="text-center text-sm"
+              className="space-y-3"
             >
-              Don&apos;t have an account?{' '}
-              <Link 
-                href="/signup" 
-                className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors"
-              >
-                Create one
-              </Link>
+              <div className="text-center text-sm">
+                Don&apos;t have an account?{' '}
+                <Link 
+                  href="/signup" 
+                  className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors"
+                >
+                  Create one
+                </Link>
+              </div>
+              <div className="text-center text-sm">
+                <Link 
+                  href="/auth/forgot-password" 
+                  className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+                >
+                  Forgot your password?
+                </Link>
+              </div>
             </motion.div>
 
             <motion.div

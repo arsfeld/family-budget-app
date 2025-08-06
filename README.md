@@ -36,7 +36,12 @@ cd family-budget-app
 just setup
 ```
 
-The app will be available at http://localhost:3000 with sample data!
+The app will be available at:
+- 🚀 Application: http://localhost:3000
+- 📧 Mailpit (email testing): http://localhost:8025
+- 📊 Database: localhost:5432
+
+Sample accounts are pre-configured with demo data!
 
 ## 📋 Prerequisites
 
@@ -73,13 +78,33 @@ just check        # Lint & typecheck
 just format       # Format code
 ```
 
+## 📧 Email Features
+
+The app includes full email functionality for:
+- **Email Verification**: New users receive verification emails
+- **Password Reset**: Secure password recovery via email
+- **Family Invitations**: Invite family members to join your budget
+
+### Local Development with Mailpit
+In development, all emails are captured by Mailpit:
+- View emails at http://localhost:8025
+- No external email service needed
+- All emails are intercepted locally
+
+### Production with Resend
+For production, configure Resend (100 free emails/day):
+1. Sign up at https://resend.com
+2. Get your API key
+3. Set `RESEND_API_KEY` in production environment
+
 ## 🏗️ Architecture
 
 - **Frontend**: Next.js 14 with App Router
 - **Backend**: Next.js API Routes
 - **Database**: PostgreSQL with Prisma ORM
 - **Authentication**: NextAuth.js with family-based auth
-- **Styling**: Tailwind CSS
+- **Styling**: Tailwind CSS with Aceternity UI
+- **Email**: Mailpit (dev) / Resend (prod)
 - **AI**: TensorFlow.js for local inference
 
 ## 📁 Project Structure

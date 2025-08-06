@@ -12,6 +12,7 @@ dev:
     docker compose up -d --build
     @echo "🚀 App running at http://localhost:3000"
     @echo "📊 Database at localhost:5432"
+    @echo "📧 Mailpit UI at http://localhost:8025"
 
 # Stop all services  
 down:
@@ -20,6 +21,14 @@ down:
 # View logs (follow mode)
 logs:
     docker compose logs -f
+
+# View Mailpit email UI
+mailpit:
+    @echo "Opening Mailpit UI..."
+    @echo "📧 http://localhost:8025"
+    @command -v xdg-open >/dev/null && xdg-open http://localhost:8025 || \
+     command -v open >/dev/null && open http://localhost:8025 || \
+     echo "Please open http://localhost:8025 in your browser"
 
 # Restart app container (useful after code changes)
 restart-app:

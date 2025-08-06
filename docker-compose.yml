@@ -12,6 +12,10 @@ services:
       - DATABASE_URL=postgresql://postgres:password@db:5432/family_budget
       - AUTH_SECRET=dev-secret-change-in-production
       - NEXTAUTH_URL=http://localhost:3000
+      # Mailpit SMTP settings for local development
+      - SMTP_HOST=mailpit
+      - SMTP_PORT=1025
+      - EMAIL_FROM=Family Budget <noreply@familybudget.local>
     volumes:
       - .:/app
       - /app/node_modules
@@ -19,6 +23,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      mailpit:
+        condition: service_started
     networks:
       - family-budget-network
 
@@ -40,6 +46,18 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: family-budget-mailpit
+    ports:
+      - '8025:8025'  # Web UI
+      - '1025:1025'  # SMTP
+    environment:
+      - MP_SMTP_AUTH_ACCEPT_ANY=true
+      - MP_SMTP_AUTH_ALLOW_INSECURE=true
+    networks:
+      - family-budget-network
 
 volumes:
   postgres_data:
