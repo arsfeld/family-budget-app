@@ -6,7 +6,7 @@ export default function Home() {
           Family Budget App
         </h1>
         <p className="text-muted-foreground mb-8 text-center text-xl">
-          Track expenses, manage budgets, and gain insights with AI
+          View monthly income and fixed expenses at a glance
         </p>
         <div className="flex justify-center gap-4">
           <a
