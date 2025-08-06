@@ -1,37 +1,37 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import { signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
+import { useState } from 'react'
+import { signIn } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 export default function LoginPage() {
   const router = useRouter()
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError("")
+    setError('')
     setIsLoading(true)
 
     try {
-      const result = await signIn("credentials", {
+      const result = await signIn('credentials', {
         email,
         password,
         redirect: false,
       })
 
       if (result?.error) {
-        setError("Invalid email or password")
+        setError('Invalid email or password')
       } else {
-        router.push("/dashboard")
+        router.push('/dashboard')
         router.refresh()
       }
-    } catch (error) {
-      setError("An error occurred. Please try again.")
+    } catch {
+      setError('An error occurred. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -42,14 +42,14 @@ export default function LoginPage() {
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
           <h1 className="text-3xl font-bold">Welcome Back</h1>
-          <p className="mt-2 text-muted-foreground">
+          <p className="text-muted-foreground mt-2">
             Sign in to your family budget
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           {error && (
-            <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive">
+            <div className="bg-destructive/15 text-destructive rounded-md p-3 text-sm">
               {error}
             </div>
           )}
@@ -67,7 +67,7 @@ export default function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                className="border-input bg-background placeholder:text-muted-foreground focus:border-primary focus:ring-primary mt-1 block w-full rounded-md border px-3 py-2 text-sm focus:ring-1 focus:outline-none"
                 placeholder="john@demo.com"
               />
             </div>
@@ -84,7 +84,7 @@ export default function LoginPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                className="border-input bg-background placeholder:text-muted-foreground focus:border-primary focus:ring-primary mt-1 block w-full rounded-md border px-3 py-2 text-sm focus:ring-1 focus:outline-none"
                 placeholder="••••••••"
               />
             </div>
@@ -93,19 +93,19 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 w-full rounded-md px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isLoading ? 'Signing in...' : 'Sign In'}
           </button>
 
           <div className="text-center text-sm">
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <Link href="/signup" className="text-primary hover:underline">
               Create one
             </Link>
           </div>
 
-          <div className="rounded-md bg-muted p-4 text-sm">
+          <div className="bg-muted rounded-md p-4 text-sm">
             <p className="font-medium">Demo Accounts:</p>
             <p>Email: john@demo.com | Password: demo123</p>
             <p>Email: jane@demo.com | Password: demo123</p>

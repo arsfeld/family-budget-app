@@ -5,19 +5,19 @@ export default function Home() {
         <h1 className="mb-8 text-center text-4xl font-bold">
           Family Budget App
         </h1>
-        <p className="mb-8 text-center text-xl text-muted-foreground">
+        <p className="text-muted-foreground mb-8 text-center text-xl">
           Track expenses, manage budgets, and gain insights with AI
         </p>
         <div className="flex justify-center gap-4">
           <a
             href="/signup"
-            className="rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground hover:bg-primary/90"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-6 py-3 font-semibold"
           >
             Get Started
           </a>
           <a
             href="/login"
-            className="rounded-lg border border-input bg-background px-6 py-3 font-semibold hover:bg-accent hover:text-accent-foreground"
+            className="border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-lg border px-6 py-3 font-semibold"
           >
             Sign In
           </a>

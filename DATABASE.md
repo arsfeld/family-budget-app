@@ -64,6 +64,7 @@ fly secrets set DATABASE_URL="<connection-string>"
 ## Backup Strategy
 
 1. **Development**: Local PostgreSQL dumps
+
    ```bash
    just db-backup
    ```
@@ -115,14 +116,14 @@ if (process.env.NODE_ENV !== 'production') {
 
 While SQLite with Litestream is simpler, PostgreSQL is better for our use case:
 
-| Feature | SQLite | PostgreSQL |
-|---------|--------|------------|
-| Setup | Simpler | Docker/Cloud |
-| Concurrent Users | Limited | Excellent |
-| Data Types | Basic | Rich |
-| Full-Text Search | Basic | Advanced |
-| JSON Support | Limited | Native |
-| Decimal Precision | Limited | Excellent |
+| Feature           | SQLite  | PostgreSQL   |
+| ----------------- | ------- | ------------ |
+| Setup             | Simpler | Docker/Cloud |
+| Concurrent Users  | Limited | Excellent    |
+| Data Types        | Basic   | Rich         |
+| Full-Text Search  | Basic   | Advanced     |
+| JSON Support      | Limited | Native       |
+| Decimal Precision | Limited | Excellent    |
 
 ## Future Considerations
 

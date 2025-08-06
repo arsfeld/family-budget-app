@@ -1,16 +1,22 @@
-"use server"
+'use server'
 
-import { auth } from "@/lib/auth"
-import { db } from "@/lib/db"
-import { revalidatePath } from "next/cache"
+import { auth } from '@/lib/auth'
+import { db } from '@/lib/db'
+import { revalidatePath } from 'next/cache'
 
 export async function updateUserIncome(
   incomeId: string,
-  data: { salaryAmount?: number; salaryFrequency?: string; monthlySalary?: number; additionalIncome?: number; notes?: string }
+  data: {
+    salaryAmount?: number
+    salaryFrequency?: string
+    monthlySalary?: number
+    additionalIncome?: number
+    notes?: string
+  }
 ) {
   const session = await auth()
   if (!session?.user?.familyId) {
-    throw new Error("Unauthorized")
+    throw new Error('Unauthorized')
   }
 
   // Verify the income belongs to the user's family
@@ -24,7 +30,7 @@ export async function updateUserIncome(
   })
 
   if (!income) {
-    throw new Error("Income not found")
+    throw new Error('Income not found')
   }
 
   // Update the income
@@ -39,16 +45,23 @@ export async function updateUserIncome(
     },
   })
 
-  revalidatePath("/dashboard")
+  revalidatePath('/dashboard')
 }
 
 export async function updateUserExpense(
   expenseId: string,
-  data: { name?: string; amount?: number; categoryId?: string; isShared?: boolean; sharePercentage?: number; notes?: string }
+  data: {
+    name?: string
+    amount?: number
+    categoryId?: string
+    isShared?: boolean
+    sharePercentage?: number
+    notes?: string
+  }
 ) {
   const session = await auth()
   if (!session?.user?.familyId) {
-    throw new Error("Unauthorized")
+    throw new Error('Unauthorized')
   }
 
   // Verify the expense belongs to the user's family
@@ -62,7 +75,7 @@ export async function updateUserExpense(
   })
 
   if (!expense) {
-    throw new Error("Expense not found")
+    throw new Error('Expense not found')
   }
 
   // Update the expense
@@ -78,13 +91,13 @@ export async function updateUserExpense(
     },
   })
 
-  revalidatePath("/dashboard")
+  revalidatePath('/dashboard')
 }
 
 export async function deleteUserExpense(expenseId: string) {
   const session = await auth()
   if (!session?.user?.familyId) {
-    throw new Error("Unauthorized")
+    throw new Error('Unauthorized')
   }
 
   // Verify the expense belongs to the user's family
@@ -98,7 +111,7 @@ export async function deleteUserExpense(expenseId: string) {
   })
 
   if (!expense) {
-    throw new Error("Expense not found")
+    throw new Error('Expense not found')
   }
 
   // Delete the expense
@@ -106,7 +119,7 @@ export async function deleteUserExpense(expenseId: string) {
     where: { id: expenseId },
   })
 
-  revalidatePath("/dashboard")
+  revalidatePath('/dashboard')
 }
 
 export async function addUserExpense(data: {
@@ -120,7 +133,7 @@ export async function addUserExpense(data: {
 }) {
   const session = await auth()
   if (!session?.user?.familyId) {
-    throw new Error("Unauthorized")
+    throw new Error('Unauthorized')
   }
 
   // Get the active overview
@@ -132,7 +145,7 @@ export async function addUserExpense(data: {
   })
 
   if (!activeOverview) {
-    throw new Error("No active overview found")
+    throw new Error('No active overview found')
   }
 
   // Verify the user and category belong to the family
@@ -152,7 +165,7 @@ export async function addUserExpense(data: {
   ])
 
   if (!user || !category) {
-    throw new Error("Invalid user or category")
+    throw new Error('Invalid user or category')
   }
 
   // Create the expense
@@ -169,16 +182,18 @@ export async function addUserExpense(data: {
     },
   })
 
-  revalidatePath("/dashboard")
+  revalidatePath('/dashboard')
 }
 
-export async function createMonthlyOverview(name: string) {
+export async function createMonthlyOverview(formData: FormData) {
   const session = await auth()
   if (!session?.user?.familyId) {
-    throw new Error("Unauthorized - no family ID in session")
+    throw new Error('Unauthorized - no family ID in session')
   }
 
-  console.log("Creating overview for family:", session.user.familyId)
+  const name = formData.get('name') as string
+
+  console.log('Creating overview for family:', session.user.familyId)
 
   // Verify the family exists
   const family = await db.family.findUnique({
@@ -186,8 +201,10 @@ export async function createMonthlyOverview(name: string) {
   })
 
   if (!family) {
-    console.error("Family not found:", session.user.familyId)
-    throw new Error(`Family not found (${session.user.familyId}). Please log out and log in again.`)
+    console.error('Family not found:', session.user.familyId)
+    throw new Error(
+      `Family not found (${session.user.familyId}). Please log out and log in again.`
+    )
   }
 
   // Create the overview in a transaction to ensure data consistency
@@ -214,11 +231,11 @@ export async function createMonthlyOverview(name: string) {
 
     // Create initial income entries for all users
     await tx.userIncome.createMany({
-      data: users.map(user => ({
+      data: users.map((user) => ({
         overviewId: overview.id,
         userId: user.id,
         salaryAmount: 0,
-        salaryFrequency: "monthly",
+        salaryFrequency: 'monthly',
         monthlySalary: 0,
         additionalIncome: 0,
         notes: null,
@@ -226,13 +243,13 @@ export async function createMonthlyOverview(name: string) {
     })
   })
 
-  revalidatePath("/dashboard")
+  revalidatePath('/dashboard')
 }
 
 export async function switchMonthlyOverview(overviewId: string) {
   const session = await auth()
   if (!session?.user?.familyId) {
-    throw new Error("Unauthorized")
+    throw new Error('Unauthorized')
   }
 
   // Verify the overview belongs to the user's family
@@ -244,7 +261,7 @@ export async function switchMonthlyOverview(overviewId: string) {
   })
 
   if (!overview) {
-    throw new Error("Overview not found")
+    throw new Error('Overview not found')
   }
 
   // Update all overviews in a transaction
@@ -262,13 +279,13 @@ export async function switchMonthlyOverview(overviewId: string) {
     })
   })
 
-  revalidatePath("/dashboard")
+  revalidatePath('/dashboard')
 }
 
 export async function deleteMonthlyOverview(overviewId: string) {
   const session = await auth()
   if (!session?.user?.familyId) {
-    throw new Error("Unauthorized")
+    throw new Error('Unauthorized')
   }
 
   // Verify the overview belongs to the user's family
@@ -280,7 +297,7 @@ export async function deleteMonthlyOverview(overviewId: string) {
   })
 
   if (!overview) {
-    throw new Error("Overview not found")
+    throw new Error('Overview not found')
   }
 
   // Don't allow deleting the last overview
@@ -289,7 +306,7 @@ export async function deleteMonthlyOverview(overviewId: string) {
   })
 
   if (overviewCount <= 1) {
-    throw new Error("Cannot delete the last overview")
+    throw new Error('Cannot delete the last overview')
   }
 
   // Delete the overview (cascade will handle related records)
@@ -312,5 +329,5 @@ export async function deleteMonthlyOverview(overviewId: string) {
     }
   }
 
-  revalidatePath("/dashboard")
+  revalidatePath('/dashboard')
 }

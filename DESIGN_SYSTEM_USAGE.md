@@ -1,12 +1,15 @@
 # Design System Usage Guide
 
 ## Overview
+
 The Family Budget App design system is implemented using Tailwind CSS with custom extensions. This guide shows how to use the centralized design system instead of styling individual components.
 
 ## Setup
 
 ### 1. Tailwind Configuration
+
 The design system is configured in `tailwind.config.ts` with:
+
 - Custom color palettes (brand, income, expense)
 - Typography scale
 - Shadow system
@@ -14,22 +17,24 @@ The design system is configured in `tailwind.config.ts` with:
 - Custom utilities
 
 ### 2. Design System Components
+
 Import pre-styled components from `components/ui/design-system.tsx`:
 
 ```tsx
-import { 
-  CardIncome, 
-  CardExpense, 
+import {
+  CardIncome,
+  CardExpense,
   CardSummary,
   HeadingPage,
   CurrencyDisplay,
-  ButtonPrimary 
-} from '@/components/ui/design-system';
+  ButtonPrimary,
+} from '@/components/ui/design-system'
 ```
 
 ## Usage Examples
 
 ### Cards
+
 Instead of manually styling cards, use the design system components:
 
 ```tsx
@@ -45,6 +50,7 @@ Instead of manually styling cards, use the design system components:
 ```
 
 ### Typography
+
 Use semantic typography components:
 
 ```tsx
@@ -58,6 +64,7 @@ Use semantic typography components:
 ```
 
 ### Colors
+
 Use the extended color palette:
 
 ```tsx
@@ -68,6 +75,7 @@ Use the extended color palette:
 ```
 
 ### Animations
+
 Use predefined animations:
 
 ```tsx
@@ -83,6 +91,7 @@ Use predefined animations:
 ```
 
 ### Shadows
+
 Use the shadow scale:
 
 ```tsx
@@ -93,6 +102,7 @@ Use the shadow scale:
 ```
 
 ### Gradients
+
 Apply gradient overlays:
 
 ```tsx
@@ -105,10 +115,11 @@ Apply gradient overlays:
 ## Common Patterns
 
 ### Income Section
+
 ```tsx
 <section className="space-y-6">
   <HeadingSection>Monthly Income</HeadingSection>
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
     {incomes.map((income, i) => (
       <AnimateIn key={income.id} delay={i * 50}>
         <CardIncome>
@@ -122,40 +133,35 @@ Apply gradient overlays:
 ```
 
 ### Summary Card
+
 ```tsx
 <CardSummary>
-  <div className="flex justify-between items-start">
+  <div className="flex items-start justify-between">
     <div>
-      <p className="text-gray-500 mb-1">Total Income</p>
+      <p className="mb-1 text-gray-500">Total Income</p>
       <CurrencyDisplay value={totalIncome} size="large" color="income" />
     </div>
-    <StatusIndicator type="positive">
-      +12% from last month
-    </StatusIndicator>
+    <StatusIndicator type="positive">+12% from last month</StatusIndicator>
   </div>
 </CardSummary>
 ```
 
 ### Form Inputs
+
 ```tsx
 <form className="space-y-4">
   <div>
-    <label className="block text-sm font-medium text-gray-700 mb-1">
+    <label className="mb-1 block text-sm font-medium text-gray-700">
       Monthly Salary
     </label>
-    <InputCurrency 
-      placeholder="$0.00"
-      value={salary}
-      onChange={handleChange}
-    />
+    <InputCurrency placeholder="$0.00" value={salary} onChange={handleChange} />
   </div>
-  <ButtonPrimary type="submit">
-    Save Changes
-  </ButtonPrimary>
+  <ButtonPrimary type="submit">Save Changes</ButtonPrimary>
 </form>
 ```
 
 ### Empty States
+
 ```tsx
 <EmptyState
   title="No income sources yet"
@@ -165,6 +171,7 @@ Apply gradient overlays:
 ```
 
 ### Loading States
+
 ```tsx
 // Loading cards
 <div className="grid grid-cols-3 gap-6">
@@ -181,6 +188,7 @@ Apply gradient overlays:
 ```
 
 ## Responsive Design
+
 The design system includes responsive utilities:
 
 ```tsx
@@ -195,6 +203,7 @@ The design system includes responsive utilities:
 ```
 
 ## Accessibility
+
 The design system includes accessibility features:
 
 ```tsx

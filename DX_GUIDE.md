@@ -150,11 +150,12 @@ The `docker-compose.yml` defines these services:
 
 ```yaml
 services:
-  app:    # Next.js application (development mode)
-  db:     # PostgreSQL database
+  app: # Next.js application (development mode)
+  db: # PostgreSQL database
 ```
 
 For production, build and run the Docker image directly:
+
 ```bash
 just build  # Builds production image
 just prod   # Runs production container
@@ -279,6 +280,7 @@ fly secrets set DATABASE_URL="your-production-db-url"
 ### Common Issues
 
 1. **Port already in use**
+
    ```bash
    just down
    docker compose down -v
@@ -286,12 +288,14 @@ fly secrets set DATABASE_URL="your-production-db-url"
    ```
 
 2. **Database connection errors**
+
    ```bash
    just db-reset
    just db-migrate
    ```
 
 3. **Dependencies out of sync**
+
    ```bash
    just rebuild
    ```
@@ -321,6 +325,7 @@ fly secrets set DATABASE_URL="your-production-db-url"
 ## VSCode Setup
 
 Recommended extensions:
+
 - Docker
 - Prisma
 - ESLint
@@ -328,6 +333,7 @@ Recommended extensions:
 - Tailwind CSS IntelliSense
 
 Settings (`.vscode/settings.json`):
+
 ```json
 {
   "editor.formatOnSave": true,

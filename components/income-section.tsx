@@ -1,17 +1,21 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import { formatCurrency, SALARY_FREQUENCIES, calculateMonthlyAmount, type SalaryFrequency } from "@/lib/utils"
-import { 
+import { useState } from 'react'
+import {
+  formatCurrency,
+  SALARY_FREQUENCIES,
+  calculateMonthlyAmount,
+  type SalaryFrequency,
+} from '@/lib/utils'
+import {
   CardIncome,
   HeadingSection,
   CurrencyDisplay,
-  InputCurrency,
   StatusIndicator,
   EmptyState,
-  ButtonPrimary
-} from "@/components/ui/design-system"
-import { Edit2 } from "lucide-react"
+  ButtonPrimary,
+} from '@/components/ui/design-system'
+import { Edit2 } from 'lucide-react'
 
 interface UserIncome {
   id: string
@@ -31,7 +35,16 @@ interface UserIncome {
 
 interface IncomeSectionProps {
   userIncomes: UserIncome[]
-  onUpdate: (incomeId: string, data: { salaryAmount?: number; salaryFrequency?: string; monthlySalary?: number; additionalIncome?: number; notes?: string }) => Promise<void>
+  onUpdate: (
+    incomeId: string,
+    data: {
+      salaryAmount?: number
+      salaryFrequency?: string
+      monthlySalary?: number
+      additionalIncome?: number
+      notes?: string
+    }
+  ) => Promise<void>
 }
 
 export function IncomeSection({ userIncomes, onUpdate }: IncomeSectionProps) {
@@ -41,40 +54,53 @@ export function IncomeSection({ userIncomes, onUpdate }: IncomeSectionProps) {
     salaryFrequency: string
     additionalIncome: string
     notes: string
-  }>({ salaryAmount: "", salaryFrequency: "monthly", additionalIncome: "", notes: "" })
+  }>({
+    salaryAmount: '',
+    salaryFrequency: 'monthly',
+    additionalIncome: '',
+    notes: '',
+  })
   const [saving, setSaving] = useState(false)
 
   const startEditing = (income: UserIncome) => {
     setEditingId(income.id)
     setEditingData({
       salaryAmount: income.salaryAmount.toString(),
-      salaryFrequency: income.salaryFrequency || "monthly",
+      salaryFrequency: income.salaryFrequency || 'monthly',
       additionalIncome: income.additionalIncome.toString(),
-      notes: income.notes || "",
+      notes: income.notes || '',
     })
   }
 
   const cancelEditing = () => {
     setEditingId(null)
-    setEditingData({ salaryAmount: "", salaryFrequency: "monthly", additionalIncome: "", notes: "" })
+    setEditingData({
+      salaryAmount: '',
+      salaryFrequency: 'monthly',
+      additionalIncome: '',
+      notes: '',
+    })
   }
 
   const saveChanges = async (incomeId: string) => {
     setSaving(true)
     try {
       const salaryAmount = parseFloat(editingData.salaryAmount) || 0
-      const monthlySalary = calculateMonthlyAmount(salaryAmount, editingData.salaryFrequency as SalaryFrequency)
-      
+      const monthlySalary = calculateMonthlyAmount(
+        salaryAmount,
+        editingData.salaryFrequency as SalaryFrequency
+      )
+
       await onUpdate(incomeId, {
         salaryAmount,
         salaryFrequency: editingData.salaryFrequency,
         monthlySalary,
         additionalIncome: parseFloat(editingData.additionalIncome) || 0,
-        notes: editingData.notes || null,
+        notes: editingData.notes || undefined,
       })
       cancelEditing()
     } catch (error) {
-      console.error("Failed to update income:", error)
+      console.error('Failed to update income:', error)
     } finally {
       setSaving(false)
     }
@@ -98,30 +124,43 @@ export function IncomeSection({ userIncomes, onUpdate }: IncomeSectionProps) {
       </div>
 
       <div className="space-y-4">
-        {userIncomes.map((income, index) => {
+        {userIncomes.map((income) => {
           const total = income.monthlySalary + income.additionalIncome
           const isEditing = editingId === income.id
 
           if (isEditing) {
             return (
-              <CardIncome key={income.id} className="border-2 border-brand-primary/30 bg-brand-primary/5">
+              <CardIncome
+                key={income.id}
+                className="border-brand-primary/30 bg-brand-primary/5 border-2"
+              >
                 <div className="space-y-3">
                   <div>
                     <label className="block text-sm font-medium text-gray-700">
-                      {income.user.name}'s Salary
+                      {income.user.name}&apos;s Salary
                     </label>
                     <div className="mt-1 flex gap-2">
                       <input
                         type="number"
                         value={editingData.salaryAmount}
-                        onChange={(e) => setEditingData({ ...editingData, salaryAmount: e.target.value })}
-                        className="flex-1 px-4 py-3 bg-white rounded-lg border-2 border-transparent shadow-inner-subtle font-mono text-lg font-semibold transition-all duration-200 placeholder:text-gray-400 hover:border-gray-300 focus:outline-none focus:border-brand-primary focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)]"
+                        onChange={(e) =>
+                          setEditingData({
+                            ...editingData,
+                            salaryAmount: e.target.value,
+                          })
+                        }
+                        className="shadow-inner-subtle focus:border-brand-primary flex-1 rounded-lg border-2 border-transparent bg-white px-4 py-3 font-mono text-lg font-semibold transition-all duration-200 placeholder:text-gray-400 hover:border-gray-300 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)] focus:outline-none"
                         placeholder="0"
                       />
                       <select
                         value={editingData.salaryFrequency}
-                        onChange={(e) => setEditingData({ ...editingData, salaryFrequency: e.target.value })}
-                        className="px-4 py-3 bg-white rounded-lg border-2 border-transparent shadow-inner-subtle transition-all duration-200 hover:border-gray-300 focus:outline-none focus:border-brand-primary focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)]"
+                        onChange={(e) =>
+                          setEditingData({
+                            ...editingData,
+                            salaryFrequency: e.target.value,
+                          })
+                        }
+                        className="shadow-inner-subtle focus:border-brand-primary rounded-lg border-2 border-transparent bg-white px-4 py-3 transition-all duration-200 hover:border-gray-300 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)] focus:outline-none"
                       >
                         {SALARY_FREQUENCIES.map((freq) => (
                           <option key={freq.value} value={freq.value}>
@@ -131,28 +170,48 @@ export function IncomeSection({ userIncomes, onUpdate }: IncomeSectionProps) {
                       </select>
                     </div>
                     <p className="mt-1 text-xs text-gray-500">
-                      Monthly: {formatCurrency(calculateMonthlyAmount(parseFloat(editingData.salaryAmount) || 0, editingData.salaryFrequency as SalaryFrequency))}
+                      Monthly:{' '}
+                      {formatCurrency(
+                        calculateMonthlyAmount(
+                          parseFloat(editingData.salaryAmount) || 0,
+                          editingData.salaryFrequency as SalaryFrequency
+                        )
+                      )}
                     </p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Additional Income</label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Additional Income
+                    </label>
                     <input
                       type="number"
                       value={editingData.additionalIncome}
-                      onChange={(e) => setEditingData({ ...editingData, additionalIncome: e.target.value })}
-                      className="mt-1 block w-full px-4 py-3 bg-white rounded-lg border-2 border-transparent shadow-inner-subtle font-mono text-lg font-semibold transition-all duration-200 placeholder:text-gray-400 hover:border-gray-300 focus:outline-none focus:border-brand-primary focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)]"
+                      onChange={(e) =>
+                        setEditingData({
+                          ...editingData,
+                          additionalIncome: e.target.value,
+                        })
+                      }
+                      className="shadow-inner-subtle focus:border-brand-primary mt-1 block w-full rounded-lg border-2 border-transparent bg-white px-4 py-3 font-mono text-lg font-semibold transition-all duration-200 placeholder:text-gray-400 hover:border-gray-300 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)] focus:outline-none"
                       placeholder="0"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Notes (optional)</label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Notes (optional)
+                    </label>
                     <input
                       type="text"
                       value={editingData.notes}
-                      onChange={(e) => setEditingData({ ...editingData, notes: e.target.value })}
-                      className="mt-1 block w-full px-4 py-3 bg-white rounded-lg border-2 border-transparent shadow-inner-subtle transition-all duration-200 placeholder:text-gray-400 hover:border-gray-300 focus:outline-none focus:border-brand-primary focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)]"
+                      onChange={(e) =>
+                        setEditingData({
+                          ...editingData,
+                          notes: e.target.value,
+                        })
+                      }
+                      className="shadow-inner-subtle focus:border-brand-primary mt-1 block w-full rounded-lg border-2 border-transparent bg-white px-4 py-3 transition-all duration-200 placeholder:text-gray-400 hover:border-gray-300 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)] focus:outline-none"
                       placeholder="e.g., includes bonus"
                     />
                   </div>
@@ -161,7 +220,7 @@ export function IncomeSection({ userIncomes, onUpdate }: IncomeSectionProps) {
                     <button
                       onClick={cancelEditing}
                       disabled={saving}
-                      className="px-4 py-2 rounded-lg font-medium text-gray-700 bg-white border-2 border-gray-200 hover:bg-gray-50 hover:shadow-sm transition-all duration-200 disabled:opacity-50"
+                      className="rounded-lg border-2 border-gray-200 bg-white px-4 py-2 font-medium text-gray-700 transition-all duration-200 hover:bg-gray-50 hover:shadow-sm disabled:opacity-50"
                     >
                       Cancel
                     </button>
@@ -169,7 +228,7 @@ export function IncomeSection({ userIncomes, onUpdate }: IncomeSectionProps) {
                       onClick={() => saveChanges(income.id)}
                       disabled={saving}
                     >
-                      {saving ? "Saving..." : "Save"}
+                      {saving ? 'Saving...' : 'Save'}
                     </ButtonPrimary>
                   </div>
                 </div>
@@ -192,7 +251,10 @@ export function IncomeSection({ userIncomes, onUpdate }: IncomeSectionProps) {
                   )}
                 </p>
                 <p className="text-sm text-gray-600">
-                  {formatCurrency(income.salaryAmount)} {SALARY_FREQUENCIES.find(f => f.value === income.salaryFrequency)?.label || 'Monthly'}
+                  {formatCurrency(income.salaryAmount)}{' '}
+                  {SALARY_FREQUENCIES.find(
+                    (f) => f.value === income.salaryFrequency
+                  )?.label || 'Monthly'}
                   {income.additionalIncome > 0 && (
                     <span className="ml-2 text-green-600">
                       + {formatCurrency(income.additionalIncome)}
@@ -211,7 +273,7 @@ export function IncomeSection({ userIncomes, onUpdate }: IncomeSectionProps) {
                   className="opacity-0 transition-opacity group-hover:opacity-100"
                   title="Edit income"
                 >
-                  <Edit2 className="h-4 w-4 text-gray-500 hover:text-gray-700 transition-colors" />
+                  <Edit2 className="h-4 w-4 text-gray-500 transition-colors hover:text-gray-700" />
                 </button>
               </div>
             </CardIncome>

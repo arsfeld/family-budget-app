@@ -1,23 +1,27 @@
 # Family Budget App - Style Guide
 
 ## Design Philosophy
+
 The Family Budget App embraces **simplicity and clarity** over feature complexity. Every design decision should support the core goal: providing families with an instant, comprehensive view of their monthly financial situation.
 
 ## Visual Design Principles
 
 ### 1. Single-Page Focus
+
 - **Everything visible at once** - No navigation, tabs, or hidden sections
 - **Vertical flow** - Income → Expenses → Summary, in that order
 - **No scrolling on desktop** - All critical information above the fold
 - **Logical grouping** - Related information clustered together
 
 ### 2. Sophisticated Minimalism
+
 - **Purposeful elegance** - Every element refined and intentional
 - **Generous whitespace** - Premium feel through breathing room
 - **Subtle depth** - Layered elements with soft shadows
 - **Refined details** - Micro-interactions and transitions that delight
 
 ### 3. Color System
+
 ```
 Brand Colors:
 - Primary: #6366F1 (indigo-500) - Trust and stability
@@ -50,6 +54,7 @@ Gradient Overlays:
 ```
 
 ### 4. Depth & Elevation
+
 ```
 Shadow System:
 - Resting: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06)
@@ -70,8 +75,9 @@ Glassmorphism (for premium elements):
 ```
 
 ### 5. Typography
+
 ```
-Font Family: 
+Font Family:
 - Headers: 'Inter', -apple-system, system-ui, sans-serif
 - Body: 'Inter', -apple-system, system-ui, sans-serif
 - Numbers: 'JetBrains Mono', 'SF Mono', monospace
@@ -92,6 +98,7 @@ Letter Spacing:
 ```
 
 ### 6. Layout Structure
+
 ```
 Desktop (1024px+):
 - Max width: 1280px centered
@@ -117,6 +124,7 @@ Mobile (< 768px):
 ## Component Guidelines
 
 ### 1. Income Section
+
 ```
 Card Design:
 - Background: White with emerald gradient overlay
@@ -134,6 +142,7 @@ Content Layout:
 ```
 
 ### 2. Expense Section
+
 ```
 Card Design:
 - Background: White with amber gradient overlay
@@ -151,6 +160,7 @@ Visual Elements:
 ```
 
 ### 3. Summary Section
+
 ```
 Premium Card Design:
 - Background: Glassmorphism effect
@@ -168,6 +178,7 @@ Number Display:
 ```
 
 ### 4. Input Forms
+
 ```
 Field Design:
 - Background: White with subtle inner shadow
@@ -187,6 +198,7 @@ Interactive States:
 ## Interaction Patterns
 
 ### 1. Micro-interactions
+
 ```
 Hover Effects:
 - Cards: Lift with shadow (transform: translateY(-2px))
@@ -202,6 +214,7 @@ Click Feedback:
 ```
 
 ### 2. Data Entry
+
 ```
 Input Interactions:
 - Focus: Label floats up (if empty)
@@ -212,6 +225,7 @@ Input Interactions:
 ```
 
 ### 3. Transitions
+
 ```
 Page Transitions:
 - Initial load: Stagger fade-in (100ms delay between sections)
@@ -227,6 +241,7 @@ State Changes:
 ```
 
 ### 4. Special Effects
+
 ```
 Premium Touches:
 - Positive balance: Subtle sparkle particles
@@ -239,12 +254,14 @@ Premium Touches:
 ## Responsive Behavior
 
 ### Mobile-First Rules
+
 1. **Touch targets** - Minimum 44px height/width
 2. **Thumb reach** - Critical actions in bottom 60% of screen
 3. **No hover states** - All information accessible via tap
 4. **Collapsible sections** - Manage vertical space efficiently
 
 ### Print Styles
+
 1. **Black & white friendly** - No color-dependent information
 2. **Hide interactive elements** - Remove buttons, inputs
 3. **Compact layout** - Fit standard paper sizes
@@ -253,17 +270,20 @@ Premium Touches:
 ## Accessibility Standards
 
 ### 1. Contrast Requirements
+
 - Normal text: 4.5:1 minimum contrast ratio
 - Large text: 3:1 minimum contrast ratio
 - Interactive elements: Clear focus indicators
 
 ### 2. Screen Reader Support
+
 - Semantic HTML structure
 - Descriptive labels for all inputs
 - Currency values announced correctly
 - Summary section marked as important
 
 ### 3. Keyboard Navigation
+
 - Tab order follows visual hierarchy
 - All actions keyboard accessible
 - Escape key closes modals/dropdowns
@@ -272,6 +292,7 @@ Premium Touches:
 ## Icon & Visual Elements
 
 ### 1. Icon System
+
 ```
 Icon Library: Lucide Icons (for consistency)
 Sizes: 16px (small), 20px (default), 24px (large)
@@ -290,6 +311,7 @@ Icon Styling:
 ```
 
 ### 2. Visual Accents
+
 ```
 Decorative Elements:
 - Gradient meshes: Subtle background patterns
@@ -305,6 +327,7 @@ Status Indicators:
 ```
 
 ### 3. Charts & Visualization
+
 ```
 Progress Bars:
 - Height: 8px with rounded ends
@@ -328,6 +351,7 @@ Sparklines (Trends):
 ## Animation Guidelines
 
 ### 1. Timing & Easing
+
 ```
 Durations:
 - Micro-interactions: 150ms
@@ -344,6 +368,7 @@ Easing Functions:
 ```
 
 ### 2. Animation Patterns
+
 ```
 Enter Animations:
 - Fade up: opacity 0→1, translateY 20px→0
@@ -364,6 +389,7 @@ Loading States:
 ```
 
 ### 3. Performance Rules
+
 - Use transform and opacity only
 - Enable will-change for heavy animations
 - GPU acceleration with translateZ(0)
@@ -373,18 +399,21 @@ Loading States:
 ## Content Guidelines
 
 ### 1. Language & Tone
+
 - **Clear and direct** - No financial jargon
 - **Action-oriented** - "Add income" not "Income management"
 - **Friendly but professional** - Approachable without being casual
 - **Consistent terminology** - Same words for same concepts
 
 ### 2. Number Formatting
+
 - Currency: $1,234.56 (comma separators, 2 decimal places)
 - Percentages: 50% (no decimal unless needed)
 - Negative values: -$123.45 (minus sign prefix)
 - Zero values: Show as "$0.00" not blank
 
 ### 3. Empty States
+
 ```
 Visual Design:
 - Light gradient background
@@ -405,6 +434,7 @@ Animation:
 ```
 
 ## Performance Standards
+
 - Initial load: < 2 seconds
 - Interaction response: < 100ms
 - Smooth scrolling: 60 FPS
@@ -413,13 +443,15 @@ Animation:
 ## Brand Personality
 
 ### Visual Identity
+
 - **Modern & Trustworthy**: Clean lines with subtle depth
-- **Premium Feel**: Refined details without being ostentatious  
+- **Premium Feel**: Refined details without being ostentatious
 - **Warm & Approachable**: Soft shadows, friendly colors
 - **Professional**: Suitable for serious financial planning
 - **Delightful**: Small touches of personality in interactions
 
 ### Unique Style Elements
+
 1. **Gradient Overlays**: Subtle color washes on cards
 2. **Glassmorphism**: Premium sections with blur effects
 3. **Micro-animations**: Thoughtful motion design
@@ -430,27 +462,28 @@ Animation:
 ## Implementation Examples
 
 ### CSS Variables
+
 ```css
 :root {
   /* Brand Colors */
-  --color-brand-primary: #6366F1;
-  --color-brand-accent: #8B5CF6;
-  
+  --color-brand-primary: #6366f1;
+  --color-brand-accent: #8b5cf6;
+
   /* Income Palette */
-  --color-income-primary: #10B981;
-  --color-income-light: #D1FAE5;
-  --color-income-dark: #065F46;
-  
+  --color-income-primary: #10b981;
+  --color-income-light: #d1fae5;
+  --color-income-dark: #065f46;
+
   /* Expense Palette */
-  --color-expense-primary: #F59E0B;
-  --color-expense-light: #FEF3C7;
-  --color-expense-dark: #92400E;
-  
+  --color-expense-primary: #f59e0b;
+  --color-expense-light: #fef3c7;
+  --color-expense-dark: #92400e;
+
   /* Shadows */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.06), 0 4px 6px rgba(0, 0, 0, 0.08);
-  
+
   /* Animations */
   --ease-out: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
@@ -458,6 +491,7 @@ Animation:
 ```
 
 ## Testing Checklist
+
 - [ ] All text readable at 100% and 200% zoom
 - [ ] Works without JavaScript for initial render
 - [ ] Keyboard navigation fully functional

@@ -1,8 +1,8 @@
 'use client'
 
-import { User } from "@prisma/client"
-import { useState } from "react"
-import { updateProfile } from "./actions"
+import { User } from '@prisma/client'
+import { useState } from 'react'
+import { updateProfile } from './actions'
 
 export function ProfileForm({ user }: { user: User }) {
   const [isEditing, setIsEditing] = useState(false)
@@ -23,8 +23,8 @@ export function ProfileForm({ user }: { user: User }) {
       } else {
         setIsEditing(false)
       }
-    } catch (err) {
-      setError("Failed to update profile")
+    } catch {
+      setError('Failed to update profile')
     } finally {
       setIsLoading(false)
     }
@@ -34,26 +34,36 @@ export function ProfileForm({ user }: { user: User }) {
     return (
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700">Name</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Name
+          </label>
           <p className="mt-1 text-gray-900">{user.name}</p>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">Email</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Email
+          </label>
           <p className="mt-1 text-gray-900">{user.email}</p>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">Account Status</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Account Status
+          </label>
           <p className="mt-1">
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-              user.isVerified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-            }`}>
+            <span
+              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                user.isVerified
+                  ? 'bg-green-100 text-green-800'
+                  : 'bg-yellow-100 text-yellow-800'
+              }`}
+            >
               {user.isVerified ? 'Verified' : 'Unverified'}
             </span>
           </p>
         </div>
         <button
           onClick={() => setIsEditing(true)}
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          className="mt-4 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
         >
           Edit Profile
         </button>
@@ -64,7 +74,10 @@ export function ProfileForm({ user }: { user: User }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+        <label
+          htmlFor="name"
+          className="block text-sm font-medium text-gray-700"
+        >
           Name
         </label>
         <input
@@ -76,9 +89,12 @@ export function ProfileForm({ user }: { user: User }) {
           required
         />
       </div>
-      
+
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+        <label
+          htmlFor="email"
+          className="block text-sm font-medium text-gray-700"
+        >
           Email
         </label>
         <input
@@ -91,15 +107,13 @@ export function ProfileForm({ user }: { user: User }) {
         />
       </div>
 
-      {error && (
-        <div className="text-sm text-red-600">{error}</div>
-      )}
+      {error && <div className="text-sm text-red-600">{error}</div>}
 
       <div className="flex gap-3">
         <button
           type="submit"
           disabled={isLoading}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+          className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
         >
           {isLoading ? 'Saving...' : 'Save Changes'}
         </button>
@@ -111,7 +125,7 @@ export function ProfileForm({ user }: { user: User }) {
             setEmail(user.email)
             setError(null)
           }}
-          className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
+          className="rounded-lg bg-gray-200 px-4 py-2 text-gray-800 hover:bg-gray-300"
         >
           Cancel
         </button>

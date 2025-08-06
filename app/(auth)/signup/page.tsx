@@ -1,19 +1,19 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import { signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
+import { useState } from 'react'
+import { signIn } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 export default function SignupPage() {
   const router = useRouter()
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
   })
-  const [error, setError] = useState("")
+  const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,16 +25,16 @@ export default function SignupPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError("")
+    setError('')
 
     // Validate passwords match
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match")
+      setError('Passwords do not match')
       return
     }
 
     if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters")
+      setError('Password must be at least 6 characters')
       return
     }
 
@@ -42,10 +42,10 @@ export default function SignupPage() {
 
     try {
       // Create account
-      const signupResponse = await fetch("/api/auth/signup", {
-        method: "POST",
+      const signupResponse = await fetch('/api/auth/signup', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           name: formData.name,
@@ -57,25 +57,25 @@ export default function SignupPage() {
       const signupData = await signupResponse.json()
 
       if (!signupResponse.ok) {
-        setError(signupData.error || "Failed to create account")
+        setError(signupData.error || 'Failed to create account')
         return
       }
 
       // Automatically sign in after successful signup
-      const result = await signIn("credentials", {
+      const result = await signIn('credentials', {
         email: formData.email,
         password: formData.password,
         redirect: false,
       })
 
       if (result?.error) {
-        setError("Account created but login failed. Please try logging in.")
+        setError('Account created but login failed. Please try logging in.')
       } else {
-        router.push("/dashboard")
+        router.push('/dashboard')
         router.refresh()
       }
-    } catch (error) {
-      setError("An error occurred. Please try again.")
+    } catch {
+      setError('An error occurred. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -86,20 +86,19 @@ export default function SignupPage() {
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
           <h1 className="text-3xl font-bold">Create Your Account</h1>
-          <p className="mt-2 text-muted-foreground">
+          <p className="text-muted-foreground mt-2">
             Start managing your family budget today
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           {error && (
-            <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive">
+            <div className="bg-destructive/15 text-destructive rounded-md p-3 text-sm">
               {error}
             </div>
           )}
 
           <div className="space-y-4">
-
             <div>
               <label htmlFor="name" className="block text-sm font-medium">
                 Your Name
@@ -111,7 +110,7 @@ export default function SignupPage() {
                 required
                 value={formData.name}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                className="border-input bg-background placeholder:text-muted-foreground focus:border-primary focus:ring-primary mt-1 block w-full rounded-md border px-3 py-2 text-sm focus:ring-1 focus:outline-none"
                 placeholder="John Smith"
               />
             </div>
@@ -128,7 +127,7 @@ export default function SignupPage() {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                className="border-input bg-background placeholder:text-muted-foreground focus:border-primary focus:ring-primary mt-1 block w-full rounded-md border px-3 py-2 text-sm focus:ring-1 focus:outline-none"
                 placeholder="john@example.com"
               />
             </div>
@@ -145,13 +144,16 @@ export default function SignupPage() {
                 required
                 value={formData.password}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                className="border-input bg-background placeholder:text-muted-foreground focus:border-primary focus:ring-primary mt-1 block w-full rounded-md border px-3 py-2 text-sm focus:ring-1 focus:outline-none"
                 placeholder="••••••••"
               />
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium">
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium"
+              >
                 Confirm Password
               </label>
               <input
@@ -162,7 +164,7 @@ export default function SignupPage() {
                 required
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                className="border-input bg-background placeholder:text-muted-foreground focus:border-primary focus:ring-primary mt-1 block w-full rounded-md border px-3 py-2 text-sm focus:ring-1 focus:outline-none"
                 placeholder="••••••••"
               />
             </div>
@@ -171,7 +173,7 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 w-full rounded-md px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isLoading ? 'Creating account...' : 'Create Account'}
           </button>

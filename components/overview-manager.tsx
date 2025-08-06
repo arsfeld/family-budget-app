@@ -1,13 +1,13 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { 
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import {
   ButtonPrimary,
   EmptyState,
-  AnimateIn
-} from "@/components/ui/design-system"
-import { Plus, Settings, Trash2, ChevronDown } from "lucide-react"
+  AnimateIn,
+} from '@/components/ui/design-system'
+import { Plus, Settings, Trash2, ChevronDown } from 'lucide-react'
 
 interface MonthlyOverview {
   id: string
@@ -23,27 +23,34 @@ interface OverviewManagerProps {
   onDeleteOverview: (overviewId: string) => Promise<void>
 }
 
-export function OverviewManager({ overviews, onCreateOverview, onSwitchOverview, onDeleteOverview }: OverviewManagerProps) {
+export function OverviewManager({
+  overviews,
+  onCreateOverview,
+  onSwitchOverview,
+  onDeleteOverview,
+}: OverviewManagerProps) {
   const router = useRouter()
   const [showCreateForm, setShowCreateForm] = useState(false)
-  const [newOverviewName, setNewOverviewName] = useState("")
+  const [newOverviewName, setNewOverviewName] = useState('')
   const [creating, setCreating] = useState(false)
   const [switching, setSwitching] = useState<string | null>(null)
 
-  const activeOverview = overviews.find(o => o.isActive)
+  const activeOverview = overviews.find((o) => o.isActive)
 
   const handleCreate = async () => {
     if (!newOverviewName.trim()) return
-    
+
     setCreating(true)
     try {
       await onCreateOverview(newOverviewName)
-      setNewOverviewName("")
+      setNewOverviewName('')
       setShowCreateForm(false)
       router.refresh()
     } catch (error) {
-      console.error("Failed to create overview:", error)
-      alert(error instanceof Error ? error.message : "Failed to create overview")
+      console.error('Failed to create overview:', error)
+      alert(
+        error instanceof Error ? error.message : 'Failed to create overview'
+      )
     } finally {
       setCreating(false)
     }
@@ -55,15 +62,19 @@ export function OverviewManager({ overviews, onCreateOverview, onSwitchOverview,
       await onSwitchOverview(overviewId)
       router.refresh()
     } catch (error) {
-      console.error("Failed to switch overview:", error)
+      console.error('Failed to switch overview:', error)
     } finally {
       setSwitching(null)
     }
   }
 
   const handleDelete = async (overviewId: string) => {
-    const overview = overviews.find(o => o.id === overviewId)
-    if (!confirm(`Are you sure you want to delete "${overview?.name}"? This will remove all income and expense data for this scenario.`)) {
+    const overview = overviews.find((o) => o.id === overviewId)
+    if (
+      !confirm(
+        `Are you sure you want to delete "${overview?.name}"? This will remove all income and expense data for this scenario.`
+      )
+    ) {
       return
     }
 
@@ -71,7 +82,7 @@ export function OverviewManager({ overviews, onCreateOverview, onSwitchOverview,
       await onDeleteOverview(overviewId)
       router.refresh()
     } catch (error) {
-      console.error("Failed to delete overview:", error)
+      console.error('Failed to delete overview:', error)
     }
   }
 
@@ -83,8 +94,8 @@ export function OverviewManager({ overviews, onCreateOverview, onSwitchOverview,
           title="Welcome to Your Family Budget"
           description="Let's create your first budget scenario to get started."
           action={
-            <div className="max-w-md mx-auto w-full">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="mx-auto w-full max-w-md">
+              <label className="mb-2 block text-sm font-medium text-gray-700">
                 Budget Scenario Name
               </label>
               <div className="flex gap-2">
@@ -93,7 +104,7 @@ export function OverviewManager({ overviews, onCreateOverview, onSwitchOverview,
                   value={newOverviewName}
                   onChange={(e) => setNewOverviewName(e.target.value)}
                   placeholder="e.g., Current Budget, 2024 Plan"
-                  className="flex-1 px-4 py-3 bg-white rounded-lg border-2 border-transparent shadow-inner-subtle transition-all duration-200 placeholder:text-gray-400 hover:border-gray-300 focus:outline-none focus:border-brand-primary focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)]"
+                  className="shadow-inner-subtle focus:border-brand-primary flex-1 rounded-lg border-2 border-transparent bg-white px-4 py-3 transition-all duration-200 placeholder:text-gray-400 hover:border-gray-300 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)] focus:outline-none"
                   onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
                   autoFocus
                 />
@@ -101,11 +112,12 @@ export function OverviewManager({ overviews, onCreateOverview, onSwitchOverview,
                   onClick={handleCreate}
                   disabled={creating || !newOverviewName.trim()}
                 >
-                  {creating ? "Creating..." : "Create"}
+                  {creating ? 'Creating...' : 'Create'}
                 </ButtonPrimary>
               </div>
-              <p className="mt-3 text-xs text-gray-500 text-center">
-                You can create multiple scenarios later to compare different financial situations.
+              <p className="mt-3 text-center text-xs text-gray-500">
+                You can create multiple scenarios later to compare different
+                financial situations.
               </p>
             </div>
           }
@@ -120,23 +132,26 @@ export function OverviewManager({ overviews, onCreateOverview, onSwitchOverview,
       <div className="flex items-center gap-3">
         <div className="relative">
           <button
-            className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-all duration-200 min-w-[200px]"
+            className="flex min-w-[200px] items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 transition-all duration-200 hover:border-gray-300"
             onClick={(e) => {
               // In a real app, this would open a dropdown menu
               // For now, we'll use the select element
-              const select = e.currentTarget.nextElementSibling as HTMLSelectElement
+              const select = e.currentTarget
+                .nextElementSibling as HTMLSelectElement
               select?.focus()
               select?.click()
             }}
           >
-            <span className="font-medium text-gray-900">{activeOverview?.name}</span>
-            <ChevronDown className="h-4 w-4 text-gray-500 ml-auto" />
+            <span className="font-medium text-gray-900">
+              {activeOverview?.name}
+            </span>
+            <ChevronDown className="ml-auto h-4 w-4 text-gray-500" />
           </button>
           <select
-            value={activeOverview?.id || ""}
+            value={activeOverview?.id || ''}
             onChange={(e) => handleSwitch(e.target.value)}
             disabled={switching !== null}
-            className="absolute inset-0 opacity-0 cursor-pointer"
+            className="absolute inset-0 cursor-pointer opacity-0"
           >
             {overviews.map((overview) => (
               <option key={overview.id} value={overview.id}>
@@ -145,7 +160,7 @@ export function OverviewManager({ overviews, onCreateOverview, onSwitchOverview,
             ))}
           </select>
           {switching && (
-            <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 rounded-lg">
+            <div className="bg-opacity-75 absolute inset-0 flex items-center justify-center rounded-lg bg-white">
               <span className="text-xs text-gray-600">Switching...</span>
             </div>
           )}
@@ -158,12 +173,12 @@ export function OverviewManager({ overviews, onCreateOverview, onSwitchOverview,
               value={newOverviewName}
               onChange={(e) => setNewOverviewName(e.target.value)}
               placeholder="Scenario name..."
-              className="px-4 py-2 bg-white rounded-lg border border-gray-200 text-sm transition-all duration-200 placeholder:text-gray-400 hover:border-gray-300 focus:outline-none focus:border-brand-primary focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)]"
+              className="focus:border-brand-primary rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm transition-all duration-200 placeholder:text-gray-400 hover:border-gray-300 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)] focus:outline-none"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleCreate()
                 if (e.key === 'Escape') {
                   setShowCreateForm(false)
-                  setNewOverviewName("")
+                  setNewOverviewName('')
                 }
               }}
               autoFocus
@@ -171,16 +186,16 @@ export function OverviewManager({ overviews, onCreateOverview, onSwitchOverview,
             <button
               onClick={handleCreate}
               disabled={creating || !newOverviewName.trim()}
-              className="px-3 py-2 bg-brand-primary hover:bg-brand-primary/90 text-white text-sm font-medium rounded-lg transition-all duration-200 disabled:opacity-50"
+              className="bg-brand-primary hover:bg-brand-primary/90 rounded-lg px-3 py-2 text-sm font-medium text-white transition-all duration-200 disabled:opacity-50"
             >
-              {creating ? "..." : "Create"}
+              {creating ? '...' : 'Create'}
             </button>
             <button
               onClick={() => {
                 setShowCreateForm(false)
-                setNewOverviewName("")
+                setNewOverviewName('')
               }}
-              className="px-3 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+              className="px-3 py-2 text-gray-600 transition-colors hover:text-gray-800"
             >
               Cancel
             </button>
@@ -188,7 +203,7 @@ export function OverviewManager({ overviews, onCreateOverview, onSwitchOverview,
         ) : (
           <button
             onClick={() => setShowCreateForm(true)}
-            className="flex items-center gap-1.5 px-3 py-2 text-brand-primary hover:bg-brand-primary/5 rounded-lg transition-all duration-200"
+            className="text-brand-primary hover:bg-brand-primary/5 flex items-center gap-1.5 rounded-lg px-3 py-2 transition-all duration-200"
           >
             <Plus className="h-4 w-4" />
             <span className="font-medium">New Scenario</span>
@@ -201,15 +216,15 @@ export function OverviewManager({ overviews, onCreateOverview, onSwitchOverview,
         {overviews.length > 1 && activeOverview && (
           <button
             onClick={() => handleDelete(activeOverview.id)}
-            className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
+            className="rounded-lg p-2 text-gray-500 transition-all duration-200 hover:bg-red-50 hover:text-red-600"
             title="Delete current scenario"
           >
             <Trash2 className="h-4 w-4" />
           </button>
         )}
-        
+
         <button
-          className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-all duration-200"
+          className="flex items-center gap-2 rounded-lg px-3 py-2 text-gray-600 transition-all duration-200 hover:bg-gray-50 hover:text-gray-800"
           title="Budget settings"
         >
           <Settings className="h-4 w-4" />

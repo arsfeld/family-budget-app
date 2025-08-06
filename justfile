@@ -9,7 +9,7 @@ default:
 
 # Start development environment
 dev:
-    docker compose up -d
+    docker compose up -d --build
     @echo "🚀 App running at http://localhost:3000"
     @echo "📊 Database at localhost:5432"
 
@@ -28,6 +28,14 @@ restart-app:
 # Access app shell for debugging
 shell:
     docker compose exec app sh
+
+# Run arbitrary command in app container
+dc *args:
+    docker compose exec app {{args}}
+
+# Run npm script in app container
+run *args:
+    docker compose exec app npm run {{args}}
 
 # Database
 # --------

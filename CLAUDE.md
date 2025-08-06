@@ -9,23 +9,27 @@ This is a **Family Budget Application** - a streamlined family budget overview t
 ## Tech Stack & Architecture
 
 ### Frontend/Backend
+
 - **Next.js 15** with App Router (React 19)
 - **TypeScript** with strict mode enabled
 - **Tailwind CSS** for styling with shadcn/ui components
 - **Server Actions** enabled for form handling
 
 ### Database & Auth
+
 - **PostgreSQL** with **Prisma ORM** for type-safe database operations
 - **NextAuth.js** with family-based authentication system
 - **bcryptjs** for password hashing
 
 ### Development Environment
+
 - **Docker Compose** for consistent development setup
 - **Just** task runner for automation (`justfile`)
 - **ESLint + Prettier** for code quality
 - **TensorFlow.js** for local AI inference
 
 ### Key Features
+
 - **Family-centric multi-user system** - Users belong to families, data is family-scoped
 - **Multiple budget scenarios** - Create different "what-if" financial overviews
 - **Shared expense handling** - Percentage-based cost splitting
@@ -106,30 +110,35 @@ Category -> UserExpense (1:many)
 ## Development Guidelines
 
 ### Code Standards
+
 - **TypeScript strict mode** - No implicit any, proper typing required
 - **ESLint rules**: Follow Next.js + TypeScript recommended practices
 - **Prettier formatting**: 2-space indentation, single quotes, no semicolons
 - **Tailwind CSS**: Use utility classes, mobile-first responsive design
 
 ### Authentication System
+
 - **Family-based auth**: Users sign up and automatically create a family
 - **NextAuth.js**: JWT strategy with custom user session extensions
 - **Route protection**: Middleware protects dashboard routes
 - **Session shape**: Includes `user.familyId` for data scoping
 
 ### Database Operations
+
 - **Always use Prisma Client**: Type-safe database operations
 - **Family scoping**: All queries must filter by user's familyId
 - **Migrations**: Use `just db-migrate` for schema changes
 - **Seeding**: Sample data available via `just db-setup`
 
 ### API Development
+
 - **Server Actions**: Prefer for form submissions
 - **API Routes**: For complex operations or external integrations
 - **Error handling**: Use proper HTTP status codes and error responses
 - **Validation**: Use Zod schemas for input validation
 
 ### UI/UX Principles
+
 - **Single-page focus**: Dashboard shows all key info on one screen
 - **Monthly overview**: Focus on fixed income/expenses, not individual transactions
 - **Scenario switching**: Easy toggle between different budget scenarios
@@ -139,6 +148,7 @@ Category -> UserExpense (1:many)
 ## Environment Configuration
 
 ### Required Environment Variables
+
 ```bash
 # Database
 DATABASE_URL="postgresql://postgres:password@localhost:5432/family_budget"
@@ -152,12 +162,14 @@ OPENAI_API_KEY="your-openai-key"
 ```
 
 ### Docker Services
+
 - **app**: Next.js application (port 3000)
 - **db**: PostgreSQL 16 (port 5432)
 
 ## Testing & Quality Assurance
 
 ### Available Test Commands
+
 ```bash
 npm run test          # Run Jest tests
 npm run test:watch    # Run tests in watch mode
@@ -168,6 +180,7 @@ npm run format:check  # Check formatting
 ```
 
 ### Code Quality Checks
+
 - **TypeScript**: Strict mode enabled, no implicit any
 - **ESLint**: Next.js + TypeScript recommended rules
 - **Prettier**: Consistent code formatting with Tailwind plugin
@@ -176,12 +189,14 @@ npm run format:check  # Check formatting
 ## Deployment
 
 ### Fly.io Deployment
+
 - **Production ready**: Dockerfile with multi-stage builds
 - **Environment**: Set production secrets via `fly secrets set`
 - **Database**: Use Fly Postgres or external PostgreSQL
 - **SSL**: Automatic via Fly.io platform
 
 ### Build Process
+
 1. **Dependencies**: npm install with package-lock.json
 2. **Database**: Prisma generate for client types
 3. **Next.js**: Production build with standalone output
@@ -190,14 +205,16 @@ npm run format:check  # Check formatting
 ## Common Patterns & Best Practices
 
 ### Data Fetching
+
 ```typescript
 // Always scope by family
 const data = await db.monthlyOverview.findMany({
-  where: { familyId: user.familyId }
+  where: { familyId: user.familyId },
 })
 ```
 
 ### Form Handling
+
 ```typescript
 // Use Server Actions for form submissions
 async function createBudget(formData: FormData) {
@@ -208,6 +225,7 @@ async function createBudget(formData: FormData) {
 ```
 
 ### Component Organization
+
 - **Page components**: In app/ directory
 - **Reusable components**: In components/ directory
 - **Form components**: Handle validation and submission
@@ -216,12 +234,14 @@ async function createBudget(formData: FormData) {
 ## Troubleshooting
 
 ### Common Issues
+
 1. **Database connection**: Check Docker containers running
 2. **Prisma errors**: Run `just db-generate` after schema changes
 3. **Type errors**: Ensure Prisma client is generated
 4. **Port conflicts**: Use `just down` to stop all services
 
 ### Debug Commands
+
 ```bash
 just logs           # View all service logs
 just shell          # Access app container shell
@@ -232,6 +252,7 @@ docker compose ps   # Check service status
 ## Key Files to Understand
 
 ### Configuration
+
 - `/package.json` - Dependencies and scripts
 - `/justfile` - Development task automation
 - `/docker-compose.yml` - Development environment
@@ -240,6 +261,7 @@ docker compose ps   # Check service status
 - `/.prettierrc` - Code formatting
 
 ### Core Application
+
 - `/app/layout.tsx` - Root layout and providers
 - `/app/(dashboard)/dashboard/page.tsx` - Main dashboard
 - `/lib/auth.ts` - NextAuth configuration
@@ -247,6 +269,7 @@ docker compose ps   # Check service status
 - `/middleware.ts` - Route protection
 
 ### Documentation
+
 - `/README.md` - Quick start guide
 - `/DX_GUIDE.md` - Detailed development instructions
 - `/TECHNICAL_ROADMAP.md` - Architecture and implementation details
@@ -255,8 +278,9 @@ docker compose ps   # Check service status
 ## Development Philosophy
 
 This application prioritizes **simplicity and clarity** over feature complexity:
+
 - **Single-page overview** rather than multiple screens
-- **Monthly fixed costs** rather than detailed transaction tracking  
+- **Monthly fixed costs** rather than detailed transaction tracking
 - **Family-based sharing** rather than individual accounts
 - **Visual clarity** rather than complex analytics
 - **Quick updates** rather than detailed data entry

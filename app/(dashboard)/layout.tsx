@@ -1,4 +1,4 @@
-import { NavbarWrapper } from "@/components/navbar-wrapper"
+import { NavbarWrapper } from '@/components/navbar-wrapper'
 
 export default function DashboardLayout({
   children,

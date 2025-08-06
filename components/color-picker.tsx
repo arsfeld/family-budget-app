@@ -29,7 +29,11 @@ const DEFAULT_PRESET_COLORS = [
   '#71717a', // zinc
 ]
 
-export function ColorPicker({ value, onChange, presetColors = DEFAULT_PRESET_COLORS }: ColorPickerProps) {
+export function ColorPicker({
+  value,
+  onChange,
+  presetColors = DEFAULT_PRESET_COLORS,
+}: ColorPickerProps) {
   const [showPicker, setShowPicker] = useState(false)
   const [customColor, setCustomColor] = useState(value)
   const pickerRef = useRef<HTMLDivElement>(null)
@@ -40,7 +44,10 @@ export function ColorPicker({ value, onChange, presetColors = DEFAULT_PRESET_COL
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
+      if (
+        pickerRef.current &&
+        !pickerRef.current.contains(event.target as Node)
+      ) {
         setShowPicker(false)
       }
     }
@@ -62,28 +69,35 @@ export function ColorPicker({ value, onChange, presetColors = DEFAULT_PRESET_COL
       <button
         type="button"
         onClick={() => setShowPicker(!showPicker)}
-        className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="flex items-center gap-2 rounded-md border border-gray-300 px-3 py-2 hover:border-gray-400 focus:ring-2 focus:ring-blue-500 focus:outline-none"
       >
-        <div 
-          className="w-6 h-6 rounded border border-gray-300"
+        <div
+          className="h-6 w-6 rounded border border-gray-300"
           style={{ backgroundColor: value }}
         />
         <span className="text-sm text-gray-700">{value}</span>
-        <svg 
-          className="w-4 h-4 text-gray-400" 
-          fill="none" 
-          stroke="currentColor" 
+        <svg
+          className="h-4 w-4 text-gray-400"
+          fill="none"
+          stroke="currentColor"
           viewBox="0 0 24 24"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
         </svg>
       </button>
 
       {showPicker && (
-        <div className="absolute z-50 mt-2 p-3 bg-white rounded-lg shadow-lg border border-gray-200 min-w-[240px]">
+        <div className="absolute z-50 mt-2 min-w-[240px] rounded-lg border border-gray-200 bg-white p-3 shadow-lg">
           {/* Preset colors */}
           <div className="mb-3">
-            <p className="text-xs font-medium text-gray-700 mb-2">Preset Colors</p>
+            <p className="mb-2 text-xs font-medium text-gray-700">
+              Preset Colors
+            </p>
             <div className="grid grid-cols-6 gap-1">
               {presetColors.map((color) => (
                 <button
@@ -94,7 +108,7 @@ export function ColorPicker({ value, onChange, presetColors = DEFAULT_PRESET_COL
                     setCustomColor(color)
                     setShowPicker(false)
                   }}
-                  className={`w-8 h-8 rounded border-2 hover:scale-110 transition-transform ${
+                  className={`h-8 w-8 rounded border-2 transition-transform hover:scale-110 ${
                     value === color ? 'border-gray-900' : 'border-gray-300'
                   }`}
                   style={{ backgroundColor: color }}
@@ -105,14 +119,16 @@ export function ColorPicker({ value, onChange, presetColors = DEFAULT_PRESET_COL
           </div>
 
           {/* Custom color input */}
-          <div className="pt-3 border-t">
-            <p className="text-xs font-medium text-gray-700 mb-2">Custom Color</p>
+          <div className="border-t pt-3">
+            <p className="mb-2 text-xs font-medium text-gray-700">
+              Custom Color
+            </p>
             <div className="flex items-center gap-2">
               <input
                 type="color"
                 value={customColor}
                 onChange={handleCustomColorChange}
-                className="h-8 w-16 border border-gray-300 rounded cursor-pointer"
+                className="h-8 w-16 cursor-pointer rounded border border-gray-300"
               />
               <input
                 type="text"
@@ -127,7 +143,7 @@ export function ColorPicker({ value, onChange, presetColors = DEFAULT_PRESET_COL
                   }
                 }}
                 placeholder="#000000"
-                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="flex-1 rounded-md border border-gray-300 px-2 py-1 text-sm focus:ring-1 focus:ring-blue-500 focus:outline-none"
               />
             </div>
           </div>

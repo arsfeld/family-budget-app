@@ -28,10 +28,13 @@ export const SALARY_FREQUENCIES = [
   { value: 'yearly', label: 'Yearly', multiplier: 1 / 12 },
 ] as const
 
-export type SalaryFrequency = typeof SALARY_FREQUENCIES[number]['value']
+export type SalaryFrequency = (typeof SALARY_FREQUENCIES)[number]['value']
 
-export function calculateMonthlyAmount(amount: number, frequency: SalaryFrequency): number {
-  const freq = SALARY_FREQUENCIES.find(f => f.value === frequency)
+export function calculateMonthlyAmount(
+  amount: number,
+  frequency: SalaryFrequency
+): number {
+  const freq = SALARY_FREQUENCIES.find((f) => f.value === frequency)
   if (!freq) return amount // default to monthly if not found
   return amount * freq.multiplier
 }

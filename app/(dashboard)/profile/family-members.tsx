@@ -1,8 +1,8 @@
 'use client'
 
-import { User } from "@prisma/client"
-import { useState } from "react"
-import { inviteFamilyMember } from "./actions"
+import { User } from '@prisma/client'
+import { useState } from 'react'
+import { inviteFamilyMember } from './actions'
 
 interface FamilyMembersProps {
   familyId: string
@@ -11,10 +11,15 @@ interface FamilyMembersProps {
   currentUserId: string
 }
 
-export function FamilyMembers({ familyId, familyName, members, currentUserId }: FamilyMembersProps) {
+export function FamilyMembers({
+  familyId,
+  familyName,
+  members,
+  currentUserId,
+}: FamilyMembersProps) {
   const [isInviting, setIsInviting] = useState(false)
-  const [inviteEmail, setInviteEmail] = useState("")
-  const [inviteName, setInviteName] = useState("")
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [inviteName, setInviteName] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -26,22 +31,22 @@ export function FamilyMembers({ familyId, familyName, members, currentUserId }: 
     setSuccess(null)
 
     try {
-      const result = await inviteFamilyMember({ 
-        email: inviteEmail, 
+      const result = await inviteFamilyMember({
+        email: inviteEmail,
         name: inviteName,
-        familyId 
+        familyId,
       })
-      
+
       if (result.error) {
         setError(result.error)
       } else {
         setSuccess(`Successfully invited ${inviteName} to your family!`)
-        setInviteEmail("")
-        setInviteName("")
+        setInviteEmail('')
+        setInviteName('')
         setIsInviting(false)
       }
-    } catch (err) {
-      setError("Failed to invite family member")
+    } catch {
+      setError('Failed to invite family member')
     } finally {
       setIsLoading(false)
     }
@@ -50,25 +55,34 @@ export function FamilyMembers({ familyId, familyName, members, currentUserId }: 
   return (
     <div>
       <div className="mb-4">
-        <p className="text-sm text-gray-600">Family: <span className="font-medium">{familyName}</span></p>
+        <p className="text-sm text-gray-600">
+          Family: <span className="font-medium">{familyName}</span>
+        </p>
       </div>
 
-      <div className="space-y-3 mb-6">
+      <div className="mb-6 space-y-3">
         {members.map((member) => (
-          <div key={member.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <div
+            key={member.id}
+            className="flex items-center justify-between rounded-lg bg-gray-50 p-3"
+          >
             <div>
               <p className="font-medium">{member.name}</p>
               <p className="text-sm text-gray-600">{member.email}</p>
             </div>
             <div className="flex items-center gap-3">
               {member.id === currentUserId && (
-                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">You</span>
+                <span className="rounded bg-blue-100 px-2 py-1 text-xs text-blue-800">
+                  You
+                </span>
               )}
-              <span className={`text-xs px-2 py-1 rounded ${
-                member.isVerified 
-                  ? 'bg-green-100 text-green-800' 
-                  : 'bg-yellow-100 text-yellow-800'
-              }`}>
+              <span
+                className={`rounded px-2 py-1 text-xs ${
+                  member.isVerified
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-yellow-100 text-yellow-800'
+                }`}
+              >
                 {member.isVerified ? 'Active' : 'Pending'}
               </span>
             </div>
@@ -77,13 +91,13 @@ export function FamilyMembers({ familyId, familyName, members, currentUserId }: 
       </div>
 
       {success && (
-        <div className="mb-4 p-3 bg-green-50 text-green-800 rounded-lg text-sm">
+        <div className="mb-4 rounded-lg bg-green-50 p-3 text-sm text-green-800">
           {success}
         </div>
       )}
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 text-red-800 rounded-lg text-sm">
+        <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-800">
           {error}
         </div>
       )}
@@ -91,16 +105,19 @@ export function FamilyMembers({ familyId, familyName, members, currentUserId }: 
       {!isInviting ? (
         <button
           onClick={() => setIsInviting(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
         >
           Invite Family Member
         </button>
       ) : (
         <form onSubmit={handleInvite} className="space-y-4 border-t pt-4">
           <h3 className="font-medium">Invite a Family Member</h3>
-          
+
           <div>
-            <label htmlFor="inviteName" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="inviteName"
+              className="block text-sm font-medium text-gray-700"
+            >
               Name
             </label>
             <input
@@ -115,7 +132,10 @@ export function FamilyMembers({ familyId, familyName, members, currentUserId }: 
           </div>
 
           <div>
-            <label htmlFor="inviteEmail" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="inviteEmail"
+              className="block text-sm font-medium text-gray-700"
+            >
               Email
             </label>
             <input
@@ -130,15 +150,16 @@ export function FamilyMembers({ familyId, familyName, members, currentUserId }: 
           </div>
 
           <p className="text-sm text-gray-600">
-            They'll receive an email invitation to join your family budget. Until they verify their account, 
-            you can still assign income and expenses to them.
+            They&apos;ll receive an email invitation to join your family budget.
+            Until they verify their account, you can still assign income and
+            expenses to them.
           </p>
 
           <div className="flex gap-3">
             <button
               type="submit"
               disabled={isLoading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
             >
               {isLoading ? 'Sending Invite...' : 'Send Invite'}
             </button>
@@ -146,11 +167,11 @@ export function FamilyMembers({ familyId, familyName, members, currentUserId }: 
               type="button"
               onClick={() => {
                 setIsInviting(false)
-                setInviteEmail("")
-                setInviteName("")
+                setInviteEmail('')
+                setInviteName('')
                 setError(null)
               }}
-              className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
+              className="rounded-lg bg-gray-200 px-4 py-2 text-gray-800 hover:bg-gray-300"
             >
               Cancel
             </button>

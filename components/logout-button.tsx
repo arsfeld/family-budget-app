@@ -1,12 +1,12 @@
-"use client"
+'use client'
 
-import { signOut } from "next-auth/react"
+import { signOut } from 'next-auth/react'
 
 export function LogoutButton() {
   const handleLogout = () => {
-    signOut({ 
-      callbackUrl: "/login",
-      redirect: true 
+    signOut({
+      callbackUrl: '/login',
+      redirect: true,
     })
   }
 

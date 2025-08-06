@@ -1,9 +1,9 @@
-import { NextAuthOptions, getServerSession } from "next-auth"
-import CredentialsProvider from "next-auth/providers/credentials"
-import { db } from "@/lib/db"
-import bcrypt from "bcryptjs"
+import { NextAuthOptions, getServerSession } from 'next-auth'
+import CredentialsProvider from 'next-auth/providers/credentials'
+import { db } from '@/lib/db'
+import bcrypt from 'bcryptjs'
 
-declare module "next-auth" {
+declare module 'next-auth' {
   interface Session {
     user: {
       id: string
@@ -21,7 +21,7 @@ declare module "next-auth" {
   }
 }
 
-declare module "next-auth/jwt" {
+declare module 'next-auth/jwt' {
   interface JWT {
     id: string
     familyId: string
@@ -30,22 +30,21 @@ declare module "next-auth/jwt" {
 
 export const authOptions: NextAuthOptions = {
   session: {
-    strategy: "jwt",
+    strategy: 'jwt',
   },
   pages: {
-    signIn: "/login",
-    signUp: "/signup",
+    signIn: '/login',
   },
   providers: [
     CredentialsProvider({
-      name: "credentials",
+      name: 'credentials',
       credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          throw new Error("Invalid credentials")
+          throw new Error('Invalid credentials')
         }
 
         const user = await db.user.findUnique({
@@ -55,12 +54,14 @@ export const authOptions: NextAuthOptions = {
         })
 
         if (!user) {
-          throw new Error("User not found")
+          throw new Error('User not found')
         }
 
         // Check if user is verified and has a password
         if (!user.isVerified || !user.passwordHash) {
-          throw new Error("Account not verified. Please check your email to complete signup.")
+          throw new Error(
+            'Account not verified. Please check your email to complete signup.'
+          )
         }
 
         const isPasswordValid = await bcrypt.compare(
@@ -69,7 +70,7 @@ export const authOptions: NextAuthOptions = {
         )
 
         if (!isPasswordValid) {
-          throw new Error("Invalid password")
+          throw new Error('Invalid password')
         }
 
         return {
@@ -84,7 +85,7 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async redirect({ url, baseUrl }) {
       // Allows relative callback URLs
-      if (url.startsWith("/")) return `${baseUrl}${url}`
+      if (url.startsWith('/')) return `${baseUrl}${url}`
       // Allows callback URLs on the same origin
       else if (new URL(url).origin === baseUrl) return url
       return baseUrl
