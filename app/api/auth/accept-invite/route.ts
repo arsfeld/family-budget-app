@@ -14,16 +14,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Password must be at least 6 characters' }, { status: 400 })
     }
 
-    const invitationToken = await db.invitationToken.findUnique({
+    const invitationToken = await db.emailToken.findUnique({
       where: { token },
     })
 
-    if (!invitationToken) {
+    if (!invitationToken || invitationToken.type !== 'invitation') {
       return NextResponse.json({ error: 'Invalid invitation token' }, { status: 400 })
     }
 
     if (invitationToken.expires < new Date()) {
-      await db.invitationToken.delete({
+      await db.emailToken.delete({
         where: { id: invitationToken.id },
       })
       return NextResponse.json({ error: 'Invitation expired' }, { status: 400 })
@@ -44,15 +44,15 @@ export async function POST(request: Request) {
         email: invitationToken.email,
         name,
         passwordHash: hashedPassword,
-        familyId: invitationToken.familyId,
+        familyId: invitationToken.familyId!,
         isVerified: true,
         verifiedAt: new Date(),
-        invitedBy: invitationToken.invitedBy,
+        invitedBy: invitationToken.invitedBy!,
         invitedAt: invitationToken.createdAt,
       },
     })
 
-    await db.invitationToken.delete({
+    await db.emailToken.delete({
       where: { id: invitationToken.id },
     })
 

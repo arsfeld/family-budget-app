@@ -107,37 +107,19 @@ model Category {
   @@index([familyId])
 }
 
-// Email Verification Tokens
-model VerificationToken {
+// Unified Email Token table for all token types
+model EmailToken {
   id        String   @id @default(cuid())
   email     String
   token     String   @unique
+  type      String   // "verification" | "password_reset" | "invitation"
   expires   DateTime
   createdAt DateTime @default(now())
   
-  @@index([email])
-}
-
-// Password Reset Tokens
-model PasswordResetToken {
-  id        String   @id @default(cuid())
-  email     String
-  token     String   @unique
-  expires   DateTime
-  createdAt DateTime @default(now())
+  // Additional fields for invitation tokens
+  familyId  String?  // Only used for invitation tokens
+  invitedBy String?  // User ID who sent the invitation (for invitations)
   
-  @@index([email])
-}
-
-// Family Invitation Tokens
-model InvitationToken {
-  id         String   @id @default(cuid())
-  email      String
-  familyId   String
-  invitedBy  String   // User ID who sent the invitation
-  token      String   @unique
-  expires    DateTime
-  createdAt  DateTime @default(now())
-  
-  @@index([email])
+  @@index([email, type])
+  @@index([token])
 }

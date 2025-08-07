@@ -26,10 +26,11 @@ export async function POST(request: Request) {
     const token = crypto.randomBytes(32).toString('hex')
     const expires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
 
-    await db.verificationToken.create({
+    await db.emailToken.create({
       data: {
         email,
         token,
+        type: 'verification',
         expires,
       },
     })

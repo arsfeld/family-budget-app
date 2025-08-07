@@ -3,6 +3,8 @@
 import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
+import { sendInvitationEmail } from '@/lib/email'
+import crypto from 'crypto'
 
 const DEFAULT_CATEGORIES = [
   { name: 'Housing', icon: '🏠', color: '#10b981' },
@@ -94,6 +96,60 @@ export async function inviteFamilyMember({
       }
     }
 
+    // Get inviter details for email
+    const inviter = await db.user.findUnique({
+      where: { id: session.user.id },
+      include: { family: true },
+    })
+
+    if (!inviter) {
+      return { error: 'Inviter not found' }
+    }
+
+    // Check for existing pending invitation
+    const existingInvite = await db.emailToken.findFirst({
+      where: {
+        email,
+        type: 'invitation',
+        familyId,
+        expires: {
+          gt: new Date(),
+        },
+      },
+    })
+
+    if (existingInvite) {
+      return { error: 'An invitation has already been sent to this email' }
+    }
+
+    // Create invitation token
+    const token = crypto.randomBytes(32).toString('hex')
+    const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
+
+    await db.emailToken.create({
+      data: {
+        email,
+        token,
+        type: 'invitation',
+        expires,
+        familyId,
+        invitedBy: session.user.id,
+      },
+    })
+
+    // Send invitation email
+    const emailResult = await sendInvitationEmail(
+      email,
+      inviter.name,
+      inviter.family.name,
+      token
+    )
+
+    if (!emailResult.success) {
+      console.error('Failed to send invitation email:', emailResult.error)
+      // Still create the user even if email fails - they can be resent later
+    }
+
     // Create unverified user
     const newUser = await db.user.create({
       data: {
@@ -129,12 +185,6 @@ export async function inviteFamilyMember({
         },
       })
     }
-
-    // In a real app, you would send an invitation email here
-    // For now, we'll just log it
-    console.log(
-      `Invitation would be sent to ${email} to join family ${familyId}`
-    )
 
     revalidatePath('/profile')
     revalidatePath('/dashboard')
@@ -232,6 +282,52 @@ export async function resendInvite(userId: string) {
       return { error: 'User not found or already verified' }
     }
 
+    // Get inviter details for email
+    const inviter = await db.user.findUnique({
+      where: { id: session.user.id },
+      include: { family: true },
+    })
+
+    if (!inviter) {
+      return { error: 'Inviter not found' }
+    }
+
+    // Delete any existing tokens for this email
+    await db.emailToken.deleteMany({
+      where: {
+        email: userToInvite.email,
+        type: 'invitation',
+      },
+    })
+
+    // Create new invitation token
+    const token = crypto.randomBytes(32).toString('hex')
+    const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
+
+    await db.emailToken.create({
+      data: {
+        email: userToInvite.email,
+        token,
+        type: 'invitation',
+        expires,
+        familyId: session.user.familyId,
+        invitedBy: session.user.id,
+      },
+    })
+
+    // Send invitation email
+    const emailResult = await sendInvitationEmail(
+      userToInvite.email,
+      inviter.name,
+      inviter.family.name,
+      token
+    )
+
+    if (!emailResult.success) {
+      console.error('Failed to resend invitation email:', emailResult.error)
+      return { error: 'Failed to send invitation email' }
+    }
+
     // Update the invitation timestamp
     await db.user.update({
       where: { id: userId },
@@ -240,11 +336,6 @@ export async function resendInvite(userId: string) {
         invitedBy: session.user.id,
       },
     })
-
-    // In a real app, you would resend the invitation email here
-    console.log(
-      `Invitation resent to ${userToInvite.email} to join family ${session.user.familyId}`
-    )
 
     revalidatePath('/profile')
 

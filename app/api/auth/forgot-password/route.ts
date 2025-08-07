@@ -19,9 +19,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'If an account exists, a password reset email has been sent' }, { status: 200 })
     }
 
-    const existingToken = await db.passwordResetToken.findFirst({
+    const existingToken = await db.emailToken.findFirst({
       where: {
         email,
+        type: 'password_reset',
         expires: {
           gt: new Date(),
         },
@@ -35,10 +36,11 @@ export async function POST(request: Request) {
     const token = crypto.randomBytes(32).toString('hex')
     const expires = new Date(Date.now() + 60 * 60 * 1000) // 1 hour
 
-    await db.passwordResetToken.create({
+    await db.emailToken.create({
       data: {
         email,
         token,
+        type: 'password_reset',
         expires,
       },
     })

@@ -39,9 +39,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'User already exists with another family' }, { status: 400 })
     }
 
-    const existingInvite = await db.invitationToken.findFirst({
+    const existingInvite = await db.emailToken.findFirst({
       where: {
         email,
+        type: 'invitation',
         familyId: inviter.familyId,
         expires: {
           gt: new Date(),
@@ -56,13 +57,14 @@ export async function POST(request: Request) {
     const token = crypto.randomBytes(32).toString('hex')
     const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
 
-    await db.invitationToken.create({
+    await db.emailToken.create({
       data: {
         email,
+        token,
+        type: 'invitation',
+        expires,
         familyId: inviter.familyId,
         invitedBy: inviter.id,
-        token,
-        expires,
       },
     })
 

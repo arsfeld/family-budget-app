@@ -14,16 +14,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Password must be at least 6 characters' }, { status: 400 })
     }
 
-    const resetToken = await db.passwordResetToken.findUnique({
+    const resetToken = await db.emailToken.findUnique({
       where: { token },
     })
 
-    if (!resetToken) {
+    if (!resetToken || resetToken.type !== 'password_reset') {
       return NextResponse.json({ error: 'Invalid token' }, { status: 400 })
     }
 
     if (resetToken.expires < new Date()) {
-      await db.passwordResetToken.delete({
+      await db.emailToken.delete({
         where: { id: resetToken.id },
       })
       return NextResponse.json({ error: 'Token expired' }, { status: 400 })
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
       },
     })
 
-    await db.passwordResetToken.delete({
+    await db.emailToken.delete({
       where: { id: resetToken.id },
     })
 
