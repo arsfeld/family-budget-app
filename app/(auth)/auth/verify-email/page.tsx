@@ -1,11 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { CardSpotlight } from '@/components/ui/aceternity/card-spotlight'
 import { StatefulButton } from '@/components/ui/aceternity/stateful-button'
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const token = searchParams.get('token')
@@ -20,6 +20,7 @@ export default function VerifyEmailPage() {
     }
 
     verifyEmail()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token])
 
   const verifyEmail = async () => {
@@ -40,7 +41,7 @@ export default function VerifyEmailPage() {
         setStatus('error')
         setMessage(data.error || 'Verification failed')
       }
-    } catch (error) {
+    } catch {
       setStatus('error')
       setMessage('An error occurred during verification')
     }
@@ -81,5 +82,17 @@ export default function VerifyEmailPage() {
         </div>
       </CardSpotlight>
     </div>
+  )
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+      </div>
+    }>
+      <VerifyEmailContent />
+    </Suspense>
   )
 }

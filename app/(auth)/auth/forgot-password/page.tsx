@@ -1,13 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { CardSpotlight } from '@/components/ui/aceternity/card-spotlight'
 import { StatefulButton } from '@/components/ui/aceternity/stateful-button'
 import Link from 'next/link'
 
 export default function ForgotPasswordPage() {
-  const router = useRouter()
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -32,7 +30,7 @@ export default function ForgotPasswordPage() {
       } else {
         setError(data.error || 'Failed to send reset email')
       }
-    } catch (err) {
+    } catch {
       setError('An error occurred. Please try again.')
     } finally {
       setLoading(false)
@@ -47,7 +45,7 @@ export default function ForgotPasswordPage() {
             <div className="text-green-500 text-5xl mb-4">✓</div>
             <h1 className="text-2xl font-bold text-white">Check Your Email</h1>
             <p className="text-gray-300">
-              If an account exists with {email}, we've sent password reset instructions to that email address.
+              If an account exists with {email}, we&apos;ve sent password reset instructions to that email address.
             </p>
             <p className="text-gray-400 text-sm">
               The link will expire in 1 hour.

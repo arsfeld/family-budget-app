@@ -11,7 +11,7 @@ export async function sendEmail({ to, subject, html }: EmailOptions) {
   try {
     // Use Nodemailer for local development with Mailpit
     if (process.env.NODE_ENV === 'development' || process.env.SMTP_HOST) {
-      const transporter = nodemailer.createTransporter({
+      const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST || 'localhost',
         port: parseInt(process.env.SMTP_PORT || '1025'),
         secure: false,
