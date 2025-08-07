@@ -33,24 +33,40 @@ export async function POST(request: Request) {
       where: { email: invitationToken.email },
     })
 
-    if (existingUser) {
-      return NextResponse.json({ error: 'User already exists' }, { status: 400 })
-    }
-
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    const user = await db.user.create({
-      data: {
-        email: invitationToken.email,
-        name,
-        passwordHash: hashedPassword,
-        familyId: invitationToken.familyId!,
-        isVerified: true,
-        verifiedAt: new Date(),
-        invitedBy: invitationToken.invitedBy!,
-        invitedAt: invitationToken.createdAt,
-      },
-    })
+    let user
+
+    if (existingUser) {
+      // User was pre-created during invitation, update with password and verify
+      if (existingUser.isVerified) {
+        return NextResponse.json({ error: 'User is already verified' }, { status: 400 })
+      }
+
+      user = await db.user.update({
+        where: { id: existingUser.id },
+        data: {
+          name, // Allow updating the name they choose
+          passwordHash: hashedPassword,
+          isVerified: true,
+          verifiedAt: new Date(),
+        },
+      })
+    } else {
+      // Create new user if they don't exist yet
+      user = await db.user.create({
+        data: {
+          email: invitationToken.email,
+          name,
+          passwordHash: hashedPassword,
+          familyId: invitationToken.familyId!,
+          isVerified: true,
+          verifiedAt: new Date(),
+          invitedBy: invitationToken.invitedBy!,
+          invitedAt: invitationToken.createdAt,
+        },
+      })
+    }
 
     await db.emailToken.delete({
       where: { id: invitationToken.id },
