@@ -1,21 +1,20 @@
 import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { redirect } from 'next/navigation'
-import { IncomeSection } from '@/components/income-section'
+import { FlexibleIncomeSection } from '@/components/flexible-income-section'
 import { ExpenseSection } from '@/components/expense-section'
-import {
-  CurrencyDisplay,
-  AnimateIn,
-  EmptyState,
-} from '@/components/ui/design-system'
 import {
   IncomeCardSpotlight,
   ExpenseCardSpotlight,
   SummaryCardSpotlight,
-  PrimaryButton,
 } from '@/components/ui/aceternity'
 import {
-  updateUserIncome,
+  CurrencyDisplay,
+  AnimateIn,
+  EmptyState,
+  ButtonPrimary,
+} from '@/components/ui/components'
+import {
   updateUserExpense,
   deleteUserExpense,
   addUserExpense,
@@ -30,10 +29,14 @@ async function getOverviewData(familyId: string) {
         isActive: true,
       },
       include: {
-        userIncome: {
+        incomes: {
           include: {
             user: true,
           },
+          orderBy: [
+            { type: 'asc' },
+            { name: 'asc' },
+          ],
         },
         userExpenses: {
           include: {
@@ -65,54 +68,58 @@ async function getOverviewData(familyId: string) {
     }),
   ])
 
-  // Ensure all family members have income entries
+  // Ensure all family members have at least one salary income entry
   if (activeOverview) {
-    const usersWithIncome = new Set(
-      activeOverview.userIncome.map((ui) => ui.userId)
+    const usersWithSalaryIncome = new Set(
+      activeOverview.incomes
+        .filter(income => income.type === 'salary' && income.userId)
+        .map(income => income.userId)
     )
-    const usersWithoutIncome = users.filter((u) => !usersWithIncome.has(u.id))
+    const usersWithoutSalaryIncome = users.filter((u) => !usersWithSalaryIncome.has(u.id))
 
-    // Create default income entries for users without them
-    for (const user of usersWithoutIncome) {
-      await db.userIncome.create({
+    // Create default salary income entries for users without them
+    for (const user of usersWithoutSalaryIncome) {
+      await db.income.create({
         data: {
           overviewId: activeOverview.id,
           userId: user.id,
-          salaryAmount: 0,
-          salaryFrequency: 'monthly',
-          monthlySalary: 0,
-          additionalIncome: 0,
+          name: `${user.name}'s Salary`,
+          type: 'salary',
+          amount: 0,
+          frequency: 'monthly',
+          monthlyAmount: 0,
           notes: user.isVerified ? null : 'Unverified family member',
         },
       })
     }
 
-    // Refetch the overview with all income entries
-    const updatedOverview = await db.monthlyOverview.findFirst({
-      where: {
-        id: activeOverview.id,
-      },
-      include: {
-        userIncome: {
-          include: {
-            user: true,
+    // Refetch the overview with all income entries if we added any
+    if (usersWithoutSalaryIncome.length > 0) {
+      const updatedOverview = await db.monthlyOverview.findFirst({
+        where: {
+          id: activeOverview.id,
+        },
+        include: {
+          incomes: {
+            include: {
+              user: true,
+            },
+            orderBy: [
+              { type: 'asc' },
+              { name: 'asc' },
+            ],
           },
-          orderBy: {
-            user: {
-              createdAt: 'asc',
+          userExpenses: {
+            include: {
+              user: true,
+              category: true,
             },
           },
         },
-        userExpenses: {
-          include: {
-            user: true,
-            category: true,
-          },
-        },
-      },
-    })
+      })
 
-    return { activeOverview: updatedOverview, categories, users, allOverviews }
+      return { activeOverview: updatedOverview, categories, users, allOverviews }
+    }
   }
 
   return { activeOverview, categories, users, allOverviews }
@@ -148,7 +155,7 @@ export default async function DashboardPage() {
                   action={createMonthlyOverview}
                   className="mx-auto w-full max-w-md"
                 >
-                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                  <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Budget Scenario Name
                   </label>
                   <div className="flex gap-2">
@@ -156,13 +163,13 @@ export default async function DashboardPage() {
                       type="text"
                       name="name"
                       placeholder="e.g., Current Budget, 2024 Plan"
-                      className="flex-1 rounded-xl border border-gray-200/50 bg-white/80 px-5 py-3.5 backdrop-blur-sm transition-all duration-200 placeholder:text-gray-400 hover:border-gray-300/50 hover:bg-white/90 focus:border-indigo-300 focus:bg-white focus:shadow-[0_0_0_3px_rgba(99,102,241,0.08)] focus:outline-none"
+                      className="flex-1 rounded-xl border border-gray-200/50 dark:border-gray-700/50 bg-white/80 dark:bg-neutral-800/80 px-5 py-3.5 backdrop-blur-sm transition-all duration-200 placeholder:text-gray-400 dark:placeholder:text-gray-500 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:bg-white/90 dark:hover:bg-neutral-800/90 focus:border-indigo-300 dark:focus:border-indigo-600 focus:bg-white dark:focus:bg-neutral-800 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.08)] dark:focus:shadow-[0_0_0_3px_rgba(99,102,241,0.15)] focus:outline-none text-gray-900 dark:text-gray-100"
                       required
                       autoFocus
                     />
-                    <PrimaryButton type="submit">Create</PrimaryButton>
+                    <ButtonPrimary type="submit">Create</ButtonPrimary>
                   </div>
-                  <p className="mt-3 text-center text-xs text-gray-500">
+                  <p className="mt-3 text-center text-xs text-gray-500 dark:text-gray-400">
                     You can create multiple scenarios later to compare different
                     financial situations.
                   </p>
@@ -177,9 +184,8 @@ export default async function DashboardPage() {
 
   // Calculate totals
   const totalIncome =
-    overview?.userIncome.reduce(
-      (sum, income) =>
-        sum + Number(income.monthlySalary) + Number(income.additionalIncome),
+    overview?.incomes.reduce(
+      (sum, income) => sum + Number(income.monthlyAmount),
       0
     ) || 0
 
@@ -207,9 +213,9 @@ export default async function DashboardPage() {
   const remainingBudget = totalIncome - totalExpenses
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50/50">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-100/20 via-transparent to-transparent" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-emerald-100/20 via-transparent to-transparent" />
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50/50 dark:from-neutral-950 dark:via-neutral-900 dark:to-neutral-950/50">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-100/20 via-transparent to-transparent dark:from-indigo-950/20" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-emerald-100/20 via-transparent to-transparent dark:from-emerald-950/20" />
       <div className="container relative mx-auto max-w-6xl p-6">
         {!overview ? (
           <AnimateIn delay={200}>
@@ -225,45 +231,51 @@ export default async function DashboardPage() {
             <div className="mb-10 grid gap-6 md:grid-cols-3">
               <AnimateIn delay={200}>
                 <IncomeCardSpotlight className="p-8">
-                  <p className="mb-3 text-[11px] font-semibold tracking-[0.08em] text-emerald-700/60 uppercase">
+                  <p className="mb-3 text-[11px] font-semibold tracking-[0.08em] text-emerald-700/60 dark:text-emerald-400/60 uppercase">
                     Total Income
                   </p>
                   <CurrencyDisplay
                     value={totalIncome}
-                    size="xlarge"
+                    size="large"
                     color="income"
                   />
-                  <p className="mt-4 text-sm font-medium text-emerald-600/70">Monthly revenue</p>
+                  <p className="mt-4 text-sm font-medium text-emerald-600/70 dark:text-emerald-400/70">Monthly revenue</p>
                 </IncomeCardSpotlight>
               </AnimateIn>
 
               <AnimateIn delay={300}>
                 <ExpenseCardSpotlight className="p-8">
-                  <p className="mb-3 text-[11px] font-semibold tracking-[0.08em] text-amber-700/60 uppercase">
+                  <p className="mb-3 text-[11px] font-semibold tracking-[0.08em] text-amber-700/60 dark:text-amber-400/60 uppercase">
                     Total Expenses
                   </p>
                   <CurrencyDisplay
                     value={totalExpenses}
-                    size="xlarge"
+                    size="large"
                     color="expense"
                   />
-                  <p className="mt-4 text-sm font-medium text-amber-600/70">Fixed costs</p>
+                  <p className="mt-4 text-sm font-medium text-amber-600/70 dark:text-amber-400/70">Fixed costs</p>
                 </ExpenseCardSpotlight>
               </AnimateIn>
 
               <AnimateIn delay={400}>
                 <SummaryCardSpotlight className="p-8" isPositive={remainingBudget >= 0}>
-                  <p className="mb-3 text-[11px] font-semibold tracking-[0.08em] uppercase"
-                     style={{ color: remainingBudget >= 0 ? 'rgb(99 102 241 / 0.6)' : 'rgb(244 63 94 / 0.6)' }}>
+                  <p className={`mb-3 text-[11px] font-semibold tracking-[0.08em] uppercase ${
+                    remainingBudget >= 0 
+                      ? 'text-indigo-600/60 dark:text-indigo-400/60' 
+                      : 'text-rose-600/60 dark:text-rose-400/60'
+                  }`}>
                     Balance
                   </p>
                   <CurrencyDisplay
                     value={remainingBudget}
-                    size="xlarge"
+                    size="large"
                     color={remainingBudget >= 0 ? 'income' : 'expense'}
                   />
-                  <p className="mt-4 text-sm font-medium"
-                     style={{ color: remainingBudget >= 0 ? 'rgb(99 102 241 / 0.7)' : 'rgb(244 63 94 / 0.7)' }}>
+                  <p className={`mt-4 text-sm font-medium ${
+                    remainingBudget >= 0 
+                      ? 'text-indigo-600/70 dark:text-indigo-400/70' 
+                      : 'text-rose-600/70 dark:text-rose-400/70'
+                  }`}>
                     {totalIncome > 0
                       ? `${((remainingBudget / totalIncome) * 100).toFixed(1)}% of income`
                       : '0% of income'}
@@ -275,15 +287,13 @@ export default async function DashboardPage() {
             <div className="grid gap-8 lg:grid-cols-2">
               {/* Income Section */}
               <AnimateIn delay={500}>
-                <IncomeSection
-                  userIncomes={overview.userIncome.map((income) => ({
+                <FlexibleIncomeSection
+                  incomes={overview.incomes.map((income) => ({
                     ...income,
-                    salaryAmount: Number(income.salaryAmount),
-                    salaryFrequency: income.salaryFrequency,
-                    monthlySalary: Number(income.monthlySalary),
-                    additionalIncome: Number(income.additionalIncome),
+                    amount: Number(income.amount),
+                    monthlyAmount: Number(income.monthlyAmount),
                   }))}
-                  onUpdate={updateUserIncome}
+                  users={users}
                   familyId={session.user.familyId}
                 />
               </AnimateIn>
@@ -307,6 +317,7 @@ export default async function DashboardPage() {
                     color: cat.color ?? '',
                   }))}
                   users={users.map((u) => ({ id: u.id, name: u.name }))}
+                  currentUserId={session.user.id}
                   onUpdate={updateUserExpense}
                   onDelete={deleteUserExpense}
                   onAdd={addUserExpense}
@@ -314,17 +325,6 @@ export default async function DashboardPage() {
               </AnimateIn>
             </div>
 
-            {/* Bottom Actions */}
-            <AnimateIn delay={700}>
-              <div className="mt-12 flex justify-center gap-4">
-                <button className="rounded-xl border border-gray-200/50 bg-white/60 px-7 py-3.5 font-medium text-gray-700 backdrop-blur-sm transition-all duration-200 hover:bg-white/80 hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)]">
-                  Edit Overview
-                </button>
-                <PrimaryButton className="rounded-xl px-7 py-3.5">
-                  Export PDF
-                </PrimaryButton>
-              </div>
-            </AnimateIn>
           </>
         )}
       </div>

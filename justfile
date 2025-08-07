@@ -22,6 +22,10 @@ down:
 logs:
     docker compose logs -f
 
+# View app logs only
+logs-app:
+    docker compose logs -f app
+
 # View Mailpit email UI
 mailpit:
     @echo "Opening Mailpit UI..."

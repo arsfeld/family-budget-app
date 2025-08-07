@@ -36,6 +36,7 @@ model User {
   
   family       Family        @relation(fields: [familyId], references: [id])
   userIncome   UserIncome[]
+  incomes      Income[]
   userExpenses UserExpense[]
 }
 
@@ -51,13 +52,39 @@ model MonthlyOverview {
   
   family       Family        @relation(fields: [familyId], references: [id])
   userIncome   UserIncome[]
+  incomes      Income[]
   userExpenses UserExpense[]
   
   @@index([familyId, isActive])
   @@index([familyId, isArchived])
 }
 
-// User Income (monthly salaries and additional income)
+// Income (flexible income sources - can be tied to a person or not)
+model Income {
+  id               String  @id @default(cuid())
+  overviewId       String
+  userId           String? // Optional - can be family income not tied to a person
+  name             String  // e.g., "John's Salary", "Rental Property", "Investment Returns"
+  type             String  // salary, freelance, property, investment, business, other
+  amount           Decimal @db.Decimal(10, 2)
+  frequency        String  @default("monthly") // weekly, biweekly, semimonthly, monthly, yearly, one-time
+  monthlyAmount    Decimal @db.Decimal(10, 2) // calculated monthly amount
+  isActive         Boolean @default(true)
+  startDate        DateTime?
+  endDate          DateTime?
+  notes            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  overview MonthlyOverview @relation(fields: [overviewId], references: [id], onDelete: Cascade)
+  user     User?           @relation(fields: [userId], references: [id])
+  
+  @@index([overviewId])
+  @@index([overviewId, userId])
+  @@index([type])
+}
+
+// Legacy UserIncome - kept for migration purposes, will be removed later
 model UserIncome {
   id               String  @id @default(cuid())
   overviewId       String

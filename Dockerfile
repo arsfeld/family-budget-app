@@ -15,10 +15,12 @@ RUN npm ci
 FROM base AS dev
 COPY package*.json ./
 COPY prisma ./prisma/
-RUN npm ci
-RUN npx prisma generate
+# Don't install here, let entrypoint handle it for fresh node_modules
 COPY . .
+COPY docker-entrypoint-dev.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint-dev.sh
 EXPOSE 3000
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint-dev.sh"]
 CMD ["npm", "run", "dev"]
 
 # Builder stage for production

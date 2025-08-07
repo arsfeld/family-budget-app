@@ -6,7 +6,7 @@ import {
   ButtonPrimary,
   EmptyState,
   AnimateIn,
-} from '@/components/ui/design-system'
+} from '@/components/ui/components'
 import { Plus, Settings, Trash2, ChevronDown } from 'lucide-react'
 
 interface MonthlyOverview {

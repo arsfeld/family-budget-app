@@ -1,19 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef } from 'react'
+import { ExpenseGrid } from './expense-grid'
+import { Plus } from 'lucide-react'
 import {
   HeadingSection,
   CurrencyDisplay,
-  InputCurrency,
-  StatusIndicator,
-  EmptyState,
   AnimateIn,
-} from '@/components/ui/design-system'
-import {
-  ExpenseCardSpotlight,
-  StatefulButton,
-} from '@/components/ui/aceternity'
-import { Edit2, Trash2, Plus } from 'lucide-react'
+} from '@/components/ui/components'
 
 interface Category {
   id: string
@@ -43,6 +37,7 @@ interface ExpenseSectionProps {
   userExpenses: UserExpense[]
   categories: Category[]
   users: Array<{ id: string; name: string }>
+  currentUserId?: string
   onUpdate: (
     expenseId: string,
     data: {
@@ -70,149 +65,13 @@ export function ExpenseSection({
   userExpenses,
   categories,
   users,
+  currentUserId,
   onUpdate,
   onDelete,
   onAdd,
 }: ExpenseSectionProps) {
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [editingData, setEditingData] = useState<{
-    name: string
-    amount: string
-    categoryId: string
-    isShared: boolean
-    sharePercentage: string
-    notes: string
-  }>({
-    name: '',
-    amount: '',
-    categoryId: '',
-    isShared: false,
-    sharePercentage: '100',
-    notes: '',
-  })
-  const [saving, setSaving] = useState(false)
-  const [showAddForm, setShowAddForm] = useState(false)
-  const [newExpense, setNewExpense] = useState<{
-    userId: string
-    categoryId: string
-    name: string
-    amount: string
-    isShared: boolean
-    sharePercentage: string
-    notes: string
-  }>({
-    userId: users[0]?.id || '',
-    categoryId: categories[0]?.id || '',
-    name: '',
-    amount: '',
-    isShared: false,
-    sharePercentage: '100',
-    notes: '',
-  })
-
-  const startEditing = (expense: UserExpense) => {
-    setEditingId(expense.id)
-    setEditingData({
-      name: expense.name,
-      amount: expense.amount.toString(),
-      categoryId: expense.categoryId,
-      isShared: expense.isShared,
-      sharePercentage: expense.sharePercentage.toString(),
-      notes: expense.notes || '',
-    })
-  }
-
-  const cancelEditing = () => {
-    setEditingId(null)
-    setEditingData({
-      name: '',
-      amount: '',
-      categoryId: '',
-      isShared: false,
-      sharePercentage: '100',
-      notes: '',
-    })
-  }
-
-  const saveChanges = async (expenseId: string) => {
-    setSaving(true)
-    try {
-      await onUpdate(expenseId, {
-        name: editingData.name,
-        amount: parseFloat(editingData.amount) || 0,
-        categoryId: editingData.categoryId,
-        isShared: editingData.isShared,
-        sharePercentage: parseInt(editingData.sharePercentage) || 100,
-        notes: editingData.notes || undefined,
-      })
-      cancelEditing()
-    } catch (error) {
-      console.error('Failed to update expense:', error)
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const deleteExpense = async (expenseId: string) => {
-    if (confirm('Are you sure you want to delete this expense?')) {
-      try {
-        await onDelete(expenseId)
-      } catch (error) {
-        console.error('Failed to delete expense:', error)
-      }
-    }
-  }
-
-  const addNewExpense = async () => {
-    setSaving(true)
-    try {
-      await onAdd({
-        userId: newExpense.userId,
-        categoryId: newExpense.categoryId,
-        name: newExpense.name,
-        amount: parseFloat(newExpense.amount) || 0,
-        isShared: newExpense.isShared,
-        sharePercentage: parseInt(newExpense.sharePercentage) || 100,
-        notes: newExpense.notes || undefined,
-      })
-      setShowAddForm(false)
-      setNewExpense({
-        userId: users[0]?.id || '',
-        categoryId: categories[0]?.id || '',
-        name: '',
-        amount: '',
-        isShared: false,
-        sharePercentage: '100',
-        notes: '',
-      })
-    } catch (error) {
-      console.error('Failed to add expense:', error)
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  // Group expenses by user
-  const expensesByUser = userExpenses.reduce(
-    (acc, expense) => {
-      if (!acc[expense.userId]) {
-        acc[expense.userId] = []
-      }
-      acc[expense.userId].push(expense)
-      return acc
-    },
-    {} as Record<string, UserExpense[]>
-  )
-
+  const expenseGridRef = useRef<{ addNewRow: () => void }>(null)
   // Calculate totals
-  const userTotals = Object.entries(expensesByUser).reduce(
-    (acc, [userId, expenses]) => {
-      acc[userId] = expenses.reduce((sum, expense) => sum + expense.amount, 0)
-      return acc
-    },
-    {} as Record<string, number>
-  )
-
   const categoryTotals = userExpenses.reduce(
     (acc, expense) => {
       const categoryName = expense.category.name
@@ -222,14 +81,44 @@ export function ExpenseSection({
     {} as Record<string, number>
   )
 
-  const totalExpenses = Object.values(userTotals).reduce(
-    (sum, amount) => sum + amount,
-    0
-  )
+
+  const totalExpenses = userExpenses.reduce((sum, expense) => sum + expense.amount, 0)
+
+  const handleSaveExpense = async (expense: {
+    id?: string
+    userId: string
+    name: string
+    categoryId: string
+    amount: number
+    isShared?: boolean
+    sharePercentage?: number
+  }) => {
+    if (expense.id && !expense.id.startsWith('new-')) {
+      // Update existing expense
+      await onUpdate(expense.id, {
+        name: expense.name,
+        categoryId: expense.categoryId,
+        amount: expense.amount,
+        isShared: expense.isShared,
+        sharePercentage: expense.sharePercentage,
+      })
+    } else {
+      // Add new expense
+      await onAdd({
+        userId: expense.userId,
+        categoryId: expense.categoryId,
+        name: expense.name,
+        amount: expense.amount,
+        isShared: expense.isShared || false,
+        sharePercentage: expense.sharePercentage || 100,
+      })
+    }
+  }
 
   return (
-    <div>
-      <div className="mb-6 flex items-center justify-between">
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
         <HeadingSection>Monthly Expenses</HeadingSection>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
@@ -237,8 +126,8 @@ export function ExpenseSection({
             <CurrencyDisplay value={totalExpenses} color="expense" />
           </div>
           <button
-            onClick={() => setShowAddForm(true)}
-            className="bg-expense-primary hover:bg-expense-primary/90 flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:shadow-md"
+            onClick={() => expenseGridRef.current?.addNewRow()}
+            className="rounded-lg bg-gradient-to-r from-amber-600 to-orange-600 px-3 py-1.5 text-sm font-medium text-white transition-all hover:from-amber-700 hover:to-orange-700 hover:shadow-md flex items-center gap-1.5"
           >
             <Plus className="h-3.5 w-3.5" />
             Add Expense
@@ -246,414 +135,66 @@ export function ExpenseSection({
         </div>
       </div>
 
-      {showAddForm && (
-        <AnimateIn>
-          <ExpenseCardSpotlight className="border-amber-500/30 bg-gradient-to-br from-amber-50/50 to-white mb-6 border-2 p-6">
-            <h3 className="mb-4 text-lg font-semibold text-gray-900">
-              Add New Expense
-            </h3>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Person
-                  </label>
-                  <select
-                    value={newExpense.userId}
-                    onChange={(e) =>
-                      setNewExpense({ ...newExpense, userId: e.target.value })
-                    }
-                    className="shadow-inner-subtle focus:border-expense-primary w-full rounded-lg border-2 border-transparent bg-white px-4 py-3 transition-all duration-200 hover:border-gray-300 focus:shadow-[0_0_0_3px_rgba(245,158,11,0.1)] focus:outline-none"
-                  >
-                    {users.map((user) => (
-                      <option key={user.id} value={user.id}>
-                        {user.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Category
-                  </label>
-                  <select
-                    value={newExpense.categoryId}
-                    onChange={(e) =>
-                      setNewExpense({
-                        ...newExpense,
-                        categoryId: e.target.value,
-                      })
-                    }
-                    className="shadow-inner-subtle focus:border-expense-primary w-full rounded-lg border-2 border-transparent bg-white px-4 py-3 transition-all duration-200 hover:border-gray-300 focus:shadow-[0_0_0_3px_rgba(245,158,11,0.1)] focus:outline-none"
-                  >
-                    {categories.map((category) => (
-                      <option key={category.id} value={category.id}>
-                        {category.icon} {category.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
+      {/* Expense Grid */}
+      <AnimateIn>
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+          <ExpenseGrid
+            ref={expenseGridRef}
+            users={users}
+            categories={categories}
+            existingExpenses={userExpenses.map((e) => ({
+              id: e.id,
+              userId: e.userId,
+              name: e.name,
+              categoryId: e.categoryId,
+              amount: e.amount,
+              isShared: e.isShared,
+              sharePercentage: e.sharePercentage,
+            }))}
+            currentUserId={currentUserId}
+            onSave={handleSaveExpense}
+            onDelete={onDelete}
+          />
+        </div>
+      </AnimateIn>
 
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  Expense Name
-                </label>
-                <input
-                  type="text"
-                  value={newExpense.name}
-                  onChange={(e) =>
-                    setNewExpense({ ...newExpense, name: e.target.value })
-                  }
-                  className="shadow-inner-subtle focus:border-expense-primary w-full rounded-lg border-2 border-transparent bg-white px-4 py-3 transition-all duration-200 placeholder:text-gray-400 hover:border-gray-300 focus:shadow-[0_0_0_3px_rgba(245,158,11,0.1)] focus:outline-none"
-                  placeholder="e.g., Mortgage, Daycare, Netflix"
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Amount
-                  </label>
-                  <InputCurrency
-                    value={newExpense.amount}
-                    onChange={(e) =>
-                      setNewExpense({ ...newExpense, amount: e.target.value })
-                    }
-                    placeholder="0.00"
-                    className="focus:border-expense-primary focus:shadow-[0_0_0_3px_rgba(245,158,11,0.1)]"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700">
-                    Shared?
-                  </label>
-                  <div className="mt-2 flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      checked={newExpense.isShared}
-                      onChange={(e) =>
-                        setNewExpense({
-                          ...newExpense,
-                          isShared: e.target.checked,
-                        })
-                      }
-                      className="text-expense-primary focus:ring-expense-primary h-5 w-5 rounded border-gray-300"
-                    />
-                    {newExpense.isShared && (
-                      <>
-                        <input
-                          type="number"
-                          value={newExpense.sharePercentage}
-                          onChange={(e) =>
-                            setNewExpense({
-                              ...newExpense,
-                              sharePercentage: e.target.value,
-                            })
-                          }
-                          className="shadow-inner-subtle w-20 rounded-lg border-2 border-transparent px-3 py-2 font-mono"
-                          placeholder="100"
-                          min="0"
-                          max="100"
-                        />
-                        <span className="text-sm text-gray-600">%</span>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  Notes (optional)
-                </label>
-                <input
-                  type="text"
-                  value={newExpense.notes}
-                  onChange={(e) =>
-                    setNewExpense({ ...newExpense, notes: e.target.value })
-                  }
-                  className="shadow-inner-subtle focus:border-expense-primary w-full rounded-lg border-2 border-transparent bg-white px-4 py-3 transition-all duration-200 placeholder:text-gray-400 hover:border-gray-300 focus:shadow-[0_0_0_3px_rgba(245,158,11,0.1)] focus:outline-none"
-                  placeholder="e.g., Monthly subscription"
-                />
-              </div>
-
-              <div className="flex justify-end gap-3 pt-2">
-                <button
-                  onClick={() => setShowAddForm(false)}
-                  disabled={saving}
-                  className="rounded-lg border-2 border-gray-200 bg-white px-4 py-2 font-medium text-gray-700 transition-all duration-200 hover:bg-gray-50 hover:shadow-sm disabled:opacity-50"
-                >
-                  Cancel
-                </button>
-                <StatefulButton
-                  onClick={addNewExpense}
-                  disabled={saving || !newExpense.amount || !newExpense.name}
-                  loading={saving}
-                  loadingText="Adding..."
-                  successText="Added!"
-                  variant="success"
-                >
-                  Add Expense
-                </StatefulButton>
-              </div>
-            </div>
-          </ExpenseCardSpotlight>
-        </AnimateIn>
-      )}
-
-      <div className="space-y-6">
-        {Object.entries(expensesByUser).map(([userId, expenses], index) => {
-          const user = users.find((u) => u.id === userId)
-          const userTotal = userTotals[userId] || 0
-
-          return (
-            <AnimateIn key={userId} delay={index * 100}>
-              <ExpenseCardSpotlight className="p-6">
-                <div className="mb-4 flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    {user?.name}
-                  </h3>
-                  <CurrencyDisplay value={userTotal} color="expense" />
-                </div>
-                <div className="space-y-3">
-                  {expenses.map((expense) => {
-                    const isEditing = editingId === expense.id
-
-                    if (isEditing) {
-                      return (
-                        <div
-                          key={expense.id}
-                          className="border-expense-primary/30 bg-expense-primary/5 rounded-lg border-2 p-4"
-                        >
-                          <div className="space-y-3">
-                            <div>
-                              <label className="mb-1 block text-sm font-medium text-gray-700">
-                                Expense Name
-                              </label>
-                              <input
-                                type="text"
-                                value={editingData.name}
-                                onChange={(e) =>
-                                  setEditingData({
-                                    ...editingData,
-                                    name: e.target.value,
-                                  })
-                                }
-                                className="shadow-inner-subtle w-full rounded-lg border-2 border-transparent bg-white px-4 py-2"
-                                placeholder="e.g., Mortgage, Daycare"
-                              />
-                            </div>
-                            <div className="grid grid-cols-2 gap-3">
-                              <div>
-                                <label className="mb-1 block text-sm font-medium text-gray-700">
-                                  Category
-                                </label>
-                                <select
-                                  value={editingData.categoryId}
-                                  onChange={(e) =>
-                                    setEditingData({
-                                      ...editingData,
-                                      categoryId: e.target.value,
-                                    })
-                                  }
-                                  className="shadow-inner-subtle w-full rounded-lg border-2 border-transparent bg-white px-4 py-2"
-                                >
-                                  {categories.map((category) => (
-                                    <option
-                                      key={category.id}
-                                      value={category.id}
-                                    >
-                                      {category.icon} {category.name}
-                                    </option>
-                                  ))}
-                                </select>
-                              </div>
-                              <div>
-                                <label className="mb-1 block text-sm font-medium text-gray-700">
-                                  Amount
-                                </label>
-                                <InputCurrency
-                                  value={editingData.amount}
-                                  onChange={(e) =>
-                                    setEditingData({
-                                      ...editingData,
-                                      amount: e.target.value,
-                                    })
-                                  }
-                                  className="h-[42px] text-base"
-                                />
-                              </div>
-                            </div>
-
-                            <div className="flex items-center gap-4">
-                              <label className="flex items-center gap-2">
-                                <input
-                                  type="checkbox"
-                                  checked={editingData.isShared}
-                                  onChange={(e) =>
-                                    setEditingData({
-                                      ...editingData,
-                                      isShared: e.target.checked,
-                                    })
-                                  }
-                                  className="text-expense-primary h-4 w-4 rounded border-gray-300"
-                                />
-                                <span className="text-sm font-medium">
-                                  Shared
-                                </span>
-                              </label>
-                              {editingData.isShared && (
-                                <div className="flex items-center gap-2">
-                                  <input
-                                    type="number"
-                                    value={editingData.sharePercentage}
-                                    onChange={(e) =>
-                                      setEditingData({
-                                        ...editingData,
-                                        sharePercentage: e.target.value,
-                                      })
-                                    }
-                                    className="shadow-inner-subtle w-20 rounded-lg border-2 border-transparent px-3 py-1 font-mono"
-                                    min="0"
-                                    max="100"
-                                  />
-                                  <span className="text-sm text-gray-600">
-                                    %
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-
-                            <div className="flex justify-end gap-2 pt-2">
-                              <button
-                                onClick={cancelEditing}
-                                className="rounded-lg border-2 border-gray-200 bg-white px-4 py-2 font-medium text-gray-700 hover:bg-gray-50"
-                              >
-                                Cancel
-                              </button>
-                              <StatefulButton
-                                onClick={() => saveChanges(expense.id)}
-                                disabled={saving}
-                                loading={saving}
-                                loadingText="Saving..."
-                                successText="Saved!"
-                                variant="success"
-                                size="sm"
-                              >
-                                Save
-                              </StatefulButton>
-                            </div>
-                          </div>
-                        </div>
-                      )
-                    }
-
-                    return (
-                      <div
-                        key={expense.id}
-                        className="group hover:bg-expense-light/20 flex items-center justify-between rounded-lg p-3 transition-colors"
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="text-2xl">
-                            {expense.category.icon}
-                          </span>
-                          <div>
-                            <p className="font-medium text-gray-900">
-                              {expense.name || expense.category.name}
-                            </p>
-                            <p className="text-sm text-gray-500">
-                              {expense.category.name}
-                              {expense.isShared && (
-                                <StatusIndicator
-                                  type="neutral"
-                                  className="ml-2 text-xs"
-                                >
-                                  {expense.sharePercentage}% shared
-                                </StatusIndicator>
-                              )}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <CurrencyDisplay
-                            value={expense.amount}
-                            size="default"
-                          />
-                          <div className="flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
-                            <button
-                              onClick={() => startEditing(expense)}
-                              className="p-1 text-gray-500 transition-colors hover:text-gray-700"
-                              title="Edit expense"
-                            >
-                              <Edit2 className="h-4 w-4" />
-                            </button>
-                            <button
-                              onClick={() => deleteExpense(expense.id)}
-                              className="p-1 text-gray-500 transition-colors hover:text-red-600"
-                              title="Delete expense"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </ExpenseCardSpotlight>
-            </AnimateIn>
-          )
-        })}
-      </div>
-
-      {userExpenses.length === 0 && !showAddForm && (
-        <EmptyState
-          title="No expenses yet"
-          description="Click 'Add Expense' to start tracking your monthly costs"
-          action={
-            <button
-              onClick={() => setShowAddForm(true)}
-              className="bg-expense-primary hover:bg-expense-primary/90 flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:shadow-md"
-            >
-              <Plus className="h-4 w-4" />
-              Add Your First Expense
-            </button>
-          }
-        />
-      )}
-
-      {/* Category Summary */}
+      {/* Category Breakdown */}
       {Object.keys(categoryTotals).length > 0 && (
-        <AnimateIn delay={300}>
-          <div className="bg-gradient-brand border-brand-primary/10 mt-8 rounded-xl border p-6">
-            <h3 className="mb-4 text-lg font-semibold text-gray-900">
-              Category Breakdown
+        <AnimateIn delay={200}>
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <h3 className="text-base font-semibold text-gray-900 mb-4">
+              Spending by Category
             </h3>
             <div className="space-y-3">
               {Object.entries(categoryTotals)
                 .sort(([, a], [, b]) => b - a)
                 .map(([category, total]) => {
                   const percentage = (total / totalExpenses) * 100
+                  const categoryObj = categories.find((c) => c.name === category)
+                  
                   return (
-                    <div key={category} className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-gray-700">
-                          {category}
-                        </span>
-                        <div className="flex items-center gap-3">
-                          <span className="text-xs text-gray-500">
-                            {percentage.toFixed(1)}%
-                          </span>
-                          <CurrencyDisplay value={total} size="default" />
+                    <div key={category} className="flex items-center justify-between">
+                      <div className="flex items-center gap-3 flex-1">
+                        <span className="text-xl">{categoryObj?.icon}</span>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-sm font-medium text-gray-700">
+                              {category}
+                            </span>
+                            <div className="flex items-center gap-3">
+                              <span className="text-xs text-gray-500">
+                                {percentage.toFixed(0)}%
+                              </span>
+                              <CurrencyDisplay value={total} size="small" />
+                            </div>
+                          </div>
+                          <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full transition-all duration-500"
+                              style={{ width: `${percentage}%` }}
+                            />
+                          </div>
                         </div>
-                      </div>
-                      <div className="h-2 overflow-hidden rounded-full bg-gray-200">
-                        <div
-                          className="from-expense-primary to-expense-primary/70 h-full rounded-full bg-gradient-to-r transition-all duration-500"
-                          style={{ width: `${percentage}%` }}
-                        />
                       </div>
                     </div>
                   )

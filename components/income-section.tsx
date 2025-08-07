@@ -8,16 +8,16 @@ import {
   type SalaryFrequency,
 } from '@/lib/utils'
 import {
-  HeadingSection,
-  CurrencyDisplay,
-  StatusIndicator,
-  EmptyState,
-} from '@/components/ui/design-system'
-import {
   IncomeCardSpotlight,
   StatefulButton,
   CardSpotlight,
 } from '@/components/ui/aceternity'
+import {
+  HeadingSection,
+  CurrencyDisplay,
+  StatusIndicator,
+  EmptyState,
+} from '@/components/ui/components'
 import { Edit2, UserPlus, Mail, User } from 'lucide-react'
 import { inviteFamilyMember } from '@/app/(dashboard)/profile/actions'
 import { motion } from 'framer-motion'
@@ -309,7 +309,7 @@ export function IncomeSection({ userIncomes, familyId, onUpdate }: IncomeSection
                             salaryAmount: e.target.value,
                           })
                         }
-                        className="shadow-inner-subtle focus:border-brand-primary flex-1 rounded-lg border-2 border-transparent bg-white px-4 py-3 font-mono text-lg font-semibold transition-all duration-200 placeholder:text-gray-400 hover:border-gray-300 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)] focus:outline-none"
+                        className="shadow-inner-subtle focus:border-brand-primary flex-1 rounded-lg border-2 border-transparent bg-white dark:bg-neutral-800 px-4 py-3 font-mono text-lg font-semibold text-gray-900 dark:text-gray-100 transition-all duration-200 placeholder:text-gray-400 dark:placeholder:text-gray-500 hover:border-gray-300 dark:hover:border-gray-600 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)] dark:focus:shadow-[0_0_0_3px_rgba(99,102,241,0.2)] focus:outline-none"
                         placeholder="0"
                       />
                       <select
@@ -320,7 +320,7 @@ export function IncomeSection({ userIncomes, familyId, onUpdate }: IncomeSection
                             salaryFrequency: e.target.value,
                           })
                         }
-                        className="shadow-inner-subtle focus:border-brand-primary rounded-lg border-2 border-transparent bg-white px-4 py-3 transition-all duration-200 hover:border-gray-300 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)] focus:outline-none"
+                        className="shadow-inner-subtle focus:border-brand-primary rounded-lg border-2 border-transparent bg-white dark:bg-neutral-800 px-4 py-3 text-gray-900 dark:text-gray-100 transition-all duration-200 hover:border-gray-300 dark:hover:border-gray-600 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)] dark:focus:shadow-[0_0_0_3px_rgba(99,102,241,0.2)] focus:outline-none"
                       >
                         {SALARY_FREQUENCIES.map((freq) => (
                           <option key={freq.value} value={freq.value}>

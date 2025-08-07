@@ -39,15 +39,15 @@ export default function ForgotPasswordPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-50/50 dark:from-neutral-950 dark:via-neutral-900 dark:to-neutral-950/50">
         <CardSpotlight className="w-full max-w-md p-8">
           <div className="text-center space-y-4">
             <div className="text-green-500 text-5xl mb-4">✓</div>
-            <h1 className="text-2xl font-bold text-white">Check Your Email</h1>
-            <p className="text-gray-300">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Check Your Email</h1>
+            <p className="text-gray-600 dark:text-gray-300">
               If an account exists with {email}, we&apos;ve sent password reset instructions to that email address.
             </p>
-            <p className="text-gray-400 text-sm">
+            <p className="text-gray-500 dark:text-gray-400 text-sm">
               The link will expire in 1 hour.
             </p>
             <Link href="/login">
@@ -62,16 +62,16 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-50/50 dark:from-neutral-950 dark:via-neutral-900 dark:to-neutral-950/50">
       <CardSpotlight className="w-full max-w-md p-8">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white">Reset Password</h1>
-          <p className="text-gray-300 mt-2">Enter your email to receive reset instructions</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Reset Password</h1>
+          <p className="text-gray-600 dark:text-gray-300 mt-2">Enter your email to receive reset instructions</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Email Address
             </label>
             <input
@@ -80,7 +80,7 @@ export default function ForgotPasswordPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-purple-500"
+              className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-purple-500 dark:focus:border-purple-500"
               placeholder="your@email.com"
             />
           </div>
@@ -101,7 +101,7 @@ export default function ForgotPasswordPage() {
           </StatefulButton>
 
           <div className="text-center">
-            <Link href="/login" className="text-purple-400 hover:text-purple-300 text-sm">
+            <Link href="/login" className="text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 text-sm">
               Back to Login
             </Link>
           </div>

@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { signOut } from 'next-auth/react'
 import { ScenarioDialog } from './scenario-dialog'
+// import { ThemeToggle } from './theme-toggle' // Hidden for now until dark mode is fully implemented
 import {
   Settings,
   LayoutDashboard,
@@ -313,6 +314,9 @@ export function NavbarAceternity({
             </div>
           </div>
         )}
+
+        {/* Theme Toggle - Hidden for now until dark mode is fully implemented */}
+        {/* <ThemeToggle /> */}
 
         {/* User Hover Menu */}
         <div 

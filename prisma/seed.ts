@@ -145,28 +145,74 @@ async function main() {
     },
   })
 
-  // Create user income for current overview
-  await prisma.userIncome.create({
+  // Create various income sources for current overview
+  // John's Salary
+  await prisma.income.create({
     data: {
       overviewId: currentOverview.id,
       userId: user1.id,
-      salaryAmount: 2500,
-      salaryFrequency: 'biweekly',
-      monthlySalary: 5416.67, // 2500 * 26 / 12
-      additionalIncome: 0,
-      notes: 'Software Engineer',
+      name: "John's Salary",
+      type: 'salary',
+      amount: 2500,
+      frequency: 'biweekly',
+      monthlyAmount: 5416.67, // 2500 * 26 / 12
+      notes: 'Software Engineer at TechCorp',
     },
   })
 
-  await prisma.userIncome.create({
+  // Jane's Salary
+  await prisma.income.create({
     data: {
       overviewId: currentOverview.id,
       userId: user2.id,
-      salaryAmount: 4000,
-      salaryFrequency: 'monthly',
-      monthlySalary: 4000,
-      additionalIncome: 500,
-      notes: 'Marketing Manager + Freelance',
+      name: "Jane's Salary",
+      type: 'salary',
+      amount: 4000,
+      frequency: 'monthly',
+      monthlyAmount: 4000,
+      notes: 'Marketing Manager at AdVentures',
+    },
+  })
+
+  // Jane's Freelance Income
+  await prisma.income.create({
+    data: {
+      overviewId: currentOverview.id,
+      userId: user2.id,
+      name: "Jane's Freelance Work",
+      type: 'freelance',
+      amount: 500,
+      frequency: 'monthly',
+      monthlyAmount: 500,
+      notes: 'Social media consulting',
+    },
+  })
+
+  // Rental Property Income (not tied to specific person)
+  await prisma.income.create({
+    data: {
+      overviewId: currentOverview.id,
+      userId: null,
+      name: 'Rental Property - Oak Street',
+      type: 'property',
+      amount: 1200,
+      frequency: 'monthly',
+      monthlyAmount: 1200,
+      notes: 'Two-bedroom apartment rental',
+    },
+  })
+
+  // Investment Income
+  await prisma.income.create({
+    data: {
+      overviewId: currentOverview.id,
+      userId: null,
+      name: 'Investment Dividends',
+      type: 'investment',
+      amount: 300,
+      frequency: 'monthly',
+      monthlyAmount: 300,
+      notes: 'ETF and stock dividends',
     },
   })
 
@@ -259,28 +305,85 @@ async function main() {
     },
   })
 
-  // Copy income to planned overview with raise
-  await prisma.userIncome.create({
+  // Create income for planned overview with raises and new opportunities
+  await prisma.income.create({
     data: {
       overviewId: plannedOverview.id,
       userId: user1.id,
-      salaryAmount: 60000,
-      salaryFrequency: 'yearly',
-      monthlySalary: 5000, // 60000 / 12
-      additionalIncome: 0,
-      notes: 'Software Engineer (with raise)',
+      name: "John's Salary (with raise)",
+      type: 'salary',
+      amount: 60000,
+      frequency: 'yearly',
+      monthlyAmount: 5000, // 60000 / 12
+      notes: 'Software Engineer promotion to Senior',
     },
   })
 
-  await prisma.userIncome.create({
+  await prisma.income.create({
     data: {
       overviewId: plannedOverview.id,
       userId: user2.id,
-      salaryAmount: 2000,
-      salaryFrequency: 'semimonthly',
-      monthlySalary: 4000, // 2000 * 2
-      additionalIncome: 1000, // More freelance
-      notes: 'Marketing Manager + More Freelance',
+      name: "Jane's Salary",
+      type: 'salary',
+      amount: 2000,
+      frequency: 'semimonthly',
+      monthlyAmount: 4000, // 2000 * 2
+      notes: 'Marketing Manager',
+    },
+  })
+
+  await prisma.income.create({
+    data: {
+      overviewId: plannedOverview.id,
+      userId: user2.id,
+      name: "Jane's Expanded Freelance",
+      type: 'freelance',
+      amount: 1000,
+      frequency: 'monthly',
+      monthlyAmount: 1000,
+      notes: 'Expanded consulting services',
+    },
+  })
+
+  // Same rental property
+  await prisma.income.create({
+    data: {
+      overviewId: plannedOverview.id,
+      userId: null,
+      name: 'Rental Property - Oak Street',
+      type: 'property',
+      amount: 1200,
+      frequency: 'monthly',
+      monthlyAmount: 1200,
+      notes: 'Two-bedroom apartment rental',
+    },
+  })
+
+  // Increased investment income
+  await prisma.income.create({
+    data: {
+      overviewId: plannedOverview.id,
+      userId: null,
+      name: 'Investment Portfolio',
+      type: 'investment',
+      amount: 500,
+      frequency: 'monthly',
+      monthlyAmount: 500,
+      notes: 'Expanded portfolio returns',
+    },
+  })
+
+  // New business income
+  await prisma.income.create({
+    data: {
+      overviewId: plannedOverview.id,
+      userId: user1.id,
+      name: "John's Side Business",
+      type: 'business',
+      amount: 800,
+      frequency: 'monthly',
+      monthlyAmount: 800,
+      notes: 'Mobile app development',
     },
   })
 

@@ -4,6 +4,153 @@ import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 
+export async function createIncome(data: {
+  name: string
+  type: string
+  amount: number
+  frequency: string
+  monthlyAmount: number
+  userId?: string | null
+  notes?: string
+}) {
+  const session = await auth()
+  if (!session?.user?.familyId) {
+    throw new Error('Unauthorized')
+  }
+
+  // Get the active overview
+  const activeOverview = await db.monthlyOverview.findFirst({
+    where: {
+      familyId: session.user.familyId,
+      isActive: true,
+    },
+  })
+
+  if (!activeOverview) {
+    throw new Error('No active overview found')
+  }
+
+  // If userId is provided, verify it belongs to the family
+  if (data.userId) {
+    const user = await db.user.findFirst({
+      where: {
+        id: data.userId,
+        familyId: session.user.familyId,
+      },
+    })
+
+    if (!user) {
+      throw new Error('Invalid user')
+    }
+  }
+
+  // Create the income
+  await db.income.create({
+    data: {
+      overviewId: activeOverview.id,
+      userId: data.userId,
+      name: data.name,
+      type: data.type,
+      amount: data.amount,
+      frequency: data.frequency,
+      monthlyAmount: data.monthlyAmount,
+      notes: data.notes,
+    },
+  })
+
+  revalidatePath('/dashboard')
+}
+
+export async function updateIncome(
+  incomeId: string,
+  data: {
+    name?: string
+    type?: string
+    amount?: number
+    frequency?: string
+    monthlyAmount?: number
+    userId?: string | null
+    notes?: string
+  }
+) {
+  const session = await auth()
+  if (!session?.user?.familyId) {
+    throw new Error('Unauthorized')
+  }
+
+  // Verify the income belongs to the user's family
+  const income = await db.income.findFirst({
+    where: {
+      id: incomeId,
+      overview: {
+        familyId: session.user.familyId,
+      },
+    },
+  })
+
+  if (!income) {
+    throw new Error('Income not found')
+  }
+
+  // If userId is being updated, verify it belongs to the family
+  if (data.userId !== undefined && data.userId !== null) {
+    const user = await db.user.findFirst({
+      where: {
+        id: data.userId,
+        familyId: session.user.familyId,
+      },
+    })
+
+    if (!user) {
+      throw new Error('Invalid user')
+    }
+  }
+
+  // Update the income
+  await db.income.update({
+    where: { id: incomeId },
+    data: {
+      name: data.name ?? income.name,
+      type: data.type ?? income.type,
+      amount: data.amount ?? income.amount,
+      frequency: data.frequency ?? income.frequency,
+      monthlyAmount: data.monthlyAmount ?? income.monthlyAmount,
+      userId: data.userId !== undefined ? data.userId : income.userId,
+      notes: data.notes !== undefined ? data.notes : income.notes,
+    },
+  })
+
+  revalidatePath('/dashboard')
+}
+
+export async function deleteIncome(incomeId: string) {
+  const session = await auth()
+  if (!session?.user?.familyId) {
+    throw new Error('Unauthorized')
+  }
+
+  // Verify the income belongs to the user's family
+  const income = await db.income.findFirst({
+    where: {
+      id: incomeId,
+      overview: {
+        familyId: session.user.familyId,
+      },
+    },
+  })
+
+  if (!income) {
+    throw new Error('Income not found')
+  }
+
+  // Delete the income
+  await db.income.delete({
+    where: { id: incomeId },
+  })
+
+  revalidatePath('/dashboard')
+}
+
 export async function updateUserIncome(
   incomeId: string,
   data: {
@@ -229,15 +376,16 @@ export async function createMonthlyOverview(formData: FormData) {
       where: { familyId: session.user.familyId },
     })
 
-    // Create initial income entries for all users
-    await tx.userIncome.createMany({
+    // Create initial salary income entries for all users
+    await tx.income.createMany({
       data: users.map((user) => ({
         overviewId: overview.id,
         userId: user.id,
-        salaryAmount: 0,
-        salaryFrequency: 'monthly',
-        monthlySalary: 0,
-        additionalIncome: 0,
+        name: `${user.name}'s Salary`,
+        type: 'salary',
+        amount: 0,
+        frequency: 'monthly',
+        monthlyAmount: 0,
         notes: null,
       })),
     })
@@ -421,6 +569,7 @@ export async function cloneMonthlyOverview(
       },
       include: {
         userIncome: true,
+        incomes: true,
         userExpenses: true,
       },
     })
@@ -446,16 +595,17 @@ export async function cloneMonthlyOverview(
         },
       })
 
-      // Clone income entries
-      if (sourceOverview.userIncome.length > 0) {
-        await tx.userIncome.createMany({
-          data: sourceOverview.userIncome.map((income) => ({
+      // Clone new flexible income entries
+      if (sourceOverview.incomes.length > 0) {
+        await tx.income.createMany({
+          data: sourceOverview.incomes.map((income) => ({
             overviewId: overview.id,
             userId: income.userId,
-            salaryAmount: income.salaryAmount,
-            salaryFrequency: income.salaryFrequency,
-            monthlySalary: income.monthlySalary,
-            additionalIncome: income.additionalIncome,
+            name: income.name,
+            type: income.type,
+            amount: income.amount,
+            frequency: income.frequency,
+            monthlyAmount: income.monthlyAmount,
             notes: income.notes,
           })),
         })

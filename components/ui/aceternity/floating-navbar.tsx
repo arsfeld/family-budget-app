@@ -60,7 +60,7 @@ export const FloatingNavbar = ({
         )}
       >
         <motion.div
-          className="border border-transparent dark:border-white/[0.2] rounded-2xl dark:bg-black bg-white shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)] backdrop-blur-md"
+          className="border border-gray-200/50 dark:border-white/[0.1] rounded-2xl bg-white/80 dark:bg-black/50 shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)] backdrop-blur-xl backdrop-saturate-150"
           layoutId="navbar"
         >
           <div className="flex items-center justify-between px-8 py-3 gap-8">
@@ -149,7 +149,7 @@ export const MobileFloatingNavbar = ({
       >
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="p-3 rounded-full bg-white dark:bg-black shadow-lg border border-gray-200 dark:border-gray-800"
+          className="p-3 rounded-full bg-white/80 dark:bg-black/50 shadow-lg border border-gray-200/50 dark:border-white/[0.1] backdrop-blur-xl"
         >
           <motion.svg
             width="20"
@@ -195,7 +195,7 @@ export const MobileFloatingNavbar = ({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -20 }}
             transition={{ duration: 0.2 }}
-            className="fixed top-20 right-4 z-40 bg-white dark:bg-black rounded-2xl shadow-xl border border-gray-200 dark:border-gray-800 p-4 min-w-[200px]"
+            className="fixed top-20 right-4 z-40 bg-white/95 dark:bg-black/80 rounded-2xl shadow-xl border border-gray-200/50 dark:border-white/[0.1] backdrop-blur-xl backdrop-saturate-150 p-4 min-w-[200px]"
           >
             <div className="flex flex-col gap-2">
               {navItems.map((navItem, idx) => (
