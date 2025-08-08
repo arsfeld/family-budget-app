@@ -10,6 +10,7 @@ declare module 'next-auth' {
       email: string
       name: string
       familyId: string
+      familyName?: string
     }
   }
 
@@ -18,6 +19,7 @@ declare module 'next-auth' {
     email: string
     name: string
     familyId: string
+    familyName?: string
   }
 }
 
@@ -25,6 +27,7 @@ declare module 'next-auth/jwt' {
   interface JWT {
     id: string
     familyId: string
+    familyName?: string
   }
 }
 
@@ -50,6 +53,9 @@ export const authOptions: NextAuthOptions = {
         const user = await db.user.findUnique({
           where: {
             email: credentials.email,
+          },
+          include: {
+            family: true,
           },
         })
 
@@ -78,6 +84,7 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           name: user.name,
           familyId: user.familyId,
+          familyName: user.family.name,
         }
       },
     }),
@@ -94,6 +101,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id
         token.familyId = user.familyId
+        token.familyName = user.familyName
       }
       return token
     },
@@ -101,6 +109,7 @@ export const authOptions: NextAuthOptions = {
       if (session?.user) {
         session.user.id = token.id as string
         session.user.familyId = token.familyId as string
+        session.user.familyName = token.familyName as string
       }
       return session
     },

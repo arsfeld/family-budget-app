@@ -63,6 +63,14 @@ db-setup:
 db-reset:
     docker compose exec app npx prisma migrate reset --force
 
+# Run database migrations
+db-migrate name="migration":
+    docker compose exec app npx prisma migrate dev --name {{name}}
+
+# Generate Prisma client
+db-generate:
+    docker compose exec app npx prisma generate
+
 # Open Prisma Studio (database GUI)
 db-studio:
     docker compose exec app npx prisma studio

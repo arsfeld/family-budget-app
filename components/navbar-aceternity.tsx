@@ -12,6 +12,8 @@ import {
   LogOut,
   Plus,
   Edit3,
+  MessageSquare,
+  Bot,
 } from 'lucide-react'
 import {
   FloatingNavbar,
@@ -106,14 +108,25 @@ export function NavbarAceternity({
     }
   }, [])
 
-  // Only show Dashboard link if not already on dashboard
-  const navItems = pathname !== '/dashboard' ? [
+  // Navigation items - show different items based on current page
+  const navItems = [
+    // Always show AI Chat as first item
     {
-      name: 'Dashboard',
-      link: '/dashboard',
-      icon: <LayoutDashboard className="w-4 h-4" />,
+      name: 'AI Assistant',
+      link: '/ai-chat',
+      icon: <Bot className="w-4 h-4" />,
+      active: pathname === '/ai-chat',
     },
-  ] : []
+    // Only show Dashboard link if not already on dashboard
+    ...(pathname !== '/dashboard' ? [
+      {
+        name: 'Dashboard',
+        link: '/dashboard',
+        icon: <LayoutDashboard className="w-4 h-4" />,
+        active: false,
+      },
+    ] : []),
+  ]
 
   const handleCreate = async (name: string, cloneFromId?: string) => {
     try {

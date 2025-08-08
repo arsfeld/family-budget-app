@@ -20,6 +20,7 @@ import {
   addUserExpense,
   createMonthlyOverview,
 } from './actions'
+// AI Chat has been moved to its own page at /ai-chat
 
 async function getOverviewData(familyId: string) {
   const [activeOverview, categories, users, allOverviews] = await Promise.all([
@@ -132,6 +133,13 @@ export default async function DashboardPage() {
     redirect('/login')
   }
 
+  // Check if onboarding is complete
+  const onboarding = await db.familyOnboarding.findUnique({
+    where: { familyId: session.user.familyId }
+  })
+
+  const isOnboardingComplete = onboarding?.completedAt !== null
+
   const {
     activeOverview: overview,
     categories,
@@ -139,7 +147,12 @@ export default async function DashboardPage() {
     allOverviews,
   } = await getOverviewData(session.user.familyId)
 
-  // If no overviews exist, show the create form
+  // If no overviews exist and onboarding not complete, redirect to onboarding
+  if (allOverviews.length === 0 && !isOnboardingComplete) {
+    redirect('/onboarding')
+  }
+
+  // If no overviews exist but onboarding is complete, show the create form
   if (allOverviews.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50/50">
@@ -217,6 +230,25 @@ export default async function DashboardPage() {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-100/20 via-transparent to-transparent dark:from-indigo-950/20" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-emerald-100/20 via-transparent to-transparent dark:from-emerald-950/20" />
       <div className="container relative mx-auto max-w-6xl p-6">
+        {/* Onboarding Banner */}
+        {!isOnboardingComplete && (
+          <div className="mb-6 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 p-4 text-white shadow-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-semibold">Complete Your Budget Setup</h3>
+                <p className="text-sm text-purple-100">
+                  Take a few minutes to set up your budget with our AI assistant
+                </p>
+              </div>
+              <a
+                href="/onboarding"
+                className="rounded-lg bg-white px-4 py-2 text-sm font-medium text-purple-600 hover:bg-purple-50 transition-colors"
+              >
+                Start Setup
+              </a>
+            </div>
+          </div>
+        )}
         {!overview ? (
           <AnimateIn delay={200}>
             <EmptyState
@@ -327,6 +359,9 @@ export default async function DashboardPage() {
 
           </>
         )}
+        
+        {/* AI Chat Assistant */}
+        {/* AI Chat has been moved to its own page - access it from the navbar */}
       </div>
     </div>
   )

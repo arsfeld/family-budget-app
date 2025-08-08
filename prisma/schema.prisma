@@ -19,6 +19,8 @@ model Family {
   users           User[]
   monthlyOverviews MonthlyOverview[]
   categories      Category[]
+  onboarding      FamilyOnboarding?
+  chatConversations ChatConversation[]
 }
 
 // Users (belong to families)
@@ -38,6 +40,7 @@ model User {
   userIncome   UserIncome[]
   incomes      Income[]
   userExpenses UserExpense[]
+  chatConversations ChatConversation[]
 }
 
 // Monthly Overviews (multiple scenarios per family)
@@ -149,4 +152,76 @@ model EmailToken {
   
   @@index([email, type])
   @@index([token])
+}
+
+// AI-Powered Onboarding
+model FamilyOnboarding {
+  id                String   @id @default(cuid())
+  familyId          String   @unique
+  family            Family   @relation(fields: [familyId], references: [id])
+  
+  // Family composition
+  adultsCount       Int?
+  childrenCount     Int?
+  childrenAges      Json?    // Array of ages
+  
+  // Financial overview
+  primaryIncome     Decimal? @db.Decimal(10, 2)
+  secondaryIncome   Decimal? @db.Decimal(10, 2)
+  otherIncome       Decimal? @db.Decimal(10, 2)
+  hasInvestments    Boolean  @default(false)
+  investmentTypes   Json?    // Array of investment types
+  monthlyInvestmentAmount Decimal? @db.Decimal(10, 2)
+  
+  // Housing
+  housingType       String?  // rent, mortgage, owned
+  housingCost       Decimal? @db.Decimal(10, 2)
+  
+  // Goals and preferences
+  savingsGoal       Decimal? @db.Decimal(10, 2)
+  financialGoals    Json?    // Array of goals
+  budgetPriorities  Json?    // Array of priorities
+  
+  // Conversation history
+  conversations     OnboardingConversation[]
+  
+  completedAt       DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model OnboardingConversation {
+  id             String   @id @default(cuid())
+  onboardingId   String
+  onboarding     FamilyOnboarding @relation(fields: [onboardingId], references: [id])
+  
+  role           String   // 'user' or 'assistant'
+  content        String   @db.Text
+  metadata       Json?    // Store extracted entities, intents
+  
+  createdAt      DateTime @default(now())
+  
+  @@index([onboardingId])
+}
+
+// Chat conversations - stores entire chat sessions
+model ChatConversation {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  familyId  String
+  family    Family   @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  
+  title     String?  // Auto-generated title or first message snippet
+  messages  Json     // Store all messages with their parts
+  metadata  Json?    // Store any additional metadata (model used, tokens, etc.)
+  
+  isActive  Boolean  @default(false) // Only one active chat per user
+  lastMessageAt DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([userId, lastMessageAt])
+  @@index([familyId])
+  @@index([userId, isActive])
 }
